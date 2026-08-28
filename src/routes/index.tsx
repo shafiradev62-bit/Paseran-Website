@@ -201,6 +201,10 @@ function Editor() {
   const [preview, setPreview] = useState(true);
   const [previewPaused, setPreviewPaused] = useState(false);
   const [previewStyle, setPreviewStyle] = useState<PreviewStyle>("cinematic");
+  const previewRef = useRef(preview);
+  useEffect(() => {
+    previewRef.current = preview;
+  }, [preview]);
 
   // Loop a silent throw while in preview mode (no notifications, like a video preview).
   useEffect(() => {
@@ -224,6 +228,15 @@ function Editor() {
     }, 1600);
     return () => window.clearTimeout(id);
   }, [preview, previewPaused, result]);
+
+  // Ganti gaya kamera tiap lemparan otomatis selesai (preview tetap variatif).
+  const prevRunning = useRef(false);
+  useEffect(() => {
+    if (preview && prevRunning.current && !running) {
+      setPreviewStyle((s) => PREVIEW_STYLES[(PREVIEW_STYLES.indexOf(s) + 1) % PREVIEW_STYLES.length] ?? s);
+    }
+    prevRunning.current = running;
+  }, [preview, running]);
   // ── Jemparingan ethno-physics state ──
   const [dartMass, setDartMass] = useState(0.012);
   const [featherArea, setFeatherArea] = useState(0.0008);
@@ -288,6 +301,9 @@ function Editor() {
   const onLanded = useCallback(
     (r: ShotResult) => {
       setRunning(false);
+      // Preview berputar secara sunyi — lempar otomatis hanya visual,
+      // tidak memunculkan notifikasi/result/hitung skor.
+      if (previewRef.current) return;
       setResult(r);
       setAttempts((a) => a + 1);
       setBest((b) => (b === null || r.error < b ? r.error : b));
