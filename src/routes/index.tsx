@@ -615,7 +615,7 @@ function Editor() {
             <li className="muted">Candi bentar · gerbang belah</li>
             <li className="muted">Gong ageng · bedug · bonang</li>
             <li className="muted">Umbul-umbul hias arena</li>
-            <li className="muted">Pohon beringin alun-alun</li>
+            <li className="muted">Pohon kelapa (vegetasi)</li>
             <li className="muted">Wayang kulit · gunungan</li>
             <li className="muted">Kuda lumping · tikar anyaman</li>
             <li className="muted">Sesajen · gentong · clingeng</li>

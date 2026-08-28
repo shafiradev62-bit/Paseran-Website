@@ -239,66 +239,6 @@ export function Bedug({
   );
 }
 
-/* ── Pohon beringin: kanopi lebar khas alun-alun ───────────────────────────── */
-export function PohonBeringin({
-  position,
-  rotation = 0,
-  scale = 1,
-}: {
-  position: [number, number, number];
-  rotation?: number;
-  scale?: number;
-}) {
-  return (
-    <group position={position} rotation={[0, rotation, 0]} scale={[scale, scale, scale]}>
-      {/* batang utama */}
-      <mesh position={[0, 1.5, 0]} castShadow>
-        <cylinderGeometry args={[0.28, 0.44, 3, 9]} />
-        <meshStandardMaterial color="#5f4a33" roughness={0.98} />
-      </mesh>
-      {/* cabang */}
-      {[0, 1, 2, 3, 4].map((i) => {
-        const a = (i / 5) * Math.PI * 2;
-        return (
-          <mesh
-            key={i}
-            position={[Math.cos(a) * 0.75, 2.9 + (i % 2) * 0.35, Math.sin(a) * 0.75]}
-            rotation={[Math.sin(a) * 0.5, -a, -Math.cos(a) * 0.5]}
-            castShadow
-          >
-            <cylinderGeometry args={[0.07, 0.13, 1.7, 6]} />
-            <meshStandardMaterial color="#54412d" roughness={0.98} />
-          </mesh>
-        );
-      })}
-      {/* akar gantung */}
-      {[0, 1, 2, 3, 4, 5].map((i) => {
-        const a = (i / 6) * Math.PI * 2 + 0.4;
-        const r = 1.35 + (i % 3) * 0.28;
-        return (
-          <mesh key={`rt${i}`} position={[Math.cos(a) * r, 1.15, Math.sin(a) * r]} castShadow>
-            <cylinderGeometry args={[0.03, 0.045, 2.3, 5]} />
-            <meshStandardMaterial color="#6a543c" roughness={0.98} />
-          </mesh>
-        );
-      })}
-      {/* kanopi lebar — 3 bola low-poly */}
-      <mesh position={[0, 4.15, 0]} scale={[2.6, 1.35, 2.6]} castShadow>
-        <sphereGeometry args={[1.35, 14, 10]} />
-        <meshStandardMaterial color="#2e5e2a" roughness={1} flatShading />
-      </mesh>
-      <mesh position={[1.5, 3.7, 0.6]} scale={[1.5, 0.95, 1.5]} castShadow>
-        <sphereGeometry args={[1.05, 12, 9]} />
-        <meshStandardMaterial color="#376e31" roughness={1} flatShading />
-      </mesh>
-      <mesh position={[-1.4, 3.8, -0.5]} scale={[1.4, 0.9, 1.4]} castShadow>
-        <sphereGeometry args={[1.0, 12, 9]} />
-        <meshStandardMaterial color="#29541f" roughness={1} flatShading />
-      </mesh>
-    </group>
-  );
-}
-
 /* ── Wayang kulit: patung datar di dudukan batok pisang ────────────────────── */
 function PuppetShape() {
   // siluet punakawan sederhana: badan + lengan menyamping

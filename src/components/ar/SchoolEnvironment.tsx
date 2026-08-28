@@ -8,7 +8,6 @@ import {
   CandiBentar,
   GongAgeng,
   Bedug,
-  PohonBeringin,
   WayangKulit,
   KudaLumping,
 } from "./JawaCulture";
@@ -149,10 +148,12 @@ function ThrowerGLB({ throwingRef }: { throwingRef?: React.MutableRefObject<bool
   const lean = useRef(0);
   useFrame((_, dt) => {
     if (!grp.current) return;
-    // Quick forward lean on release, eases back — reads as the character throwing.
-    const target = throwingRef?.current ? -0.28 : 0;
+    // Ayunan lempar yang hidup: mantul ke depan saat rilis, lalu kembali pelan.
+    const target = throwingRef?.current ? 1 : 0;
     lean.current += (target - lean.current) * Math.min(1, dt * 7);
-    grp.current.rotation.x = lean.current;
+    grp.current.rotation.x = -0.45 * lean.current;
+    grp.current.position.z = LAUNCH_Z - 0.3 * lean.current;
+    grp.current.position.y = Math.sin(lean.current * Math.PI) * 0.12;
   });
   return (
     <group ref={grp} position={[0, 0, LAUNCH_Z]} rotation={[0, Math.PI, 0]} scale={1.8}>
@@ -225,8 +226,14 @@ function PohonKelapa({
   rotation?: number;
   scale?: number;
 }) {
+  const ref = useRef<THREE.Group>(null);
+  const phase = useRef(Math.random() * Math.PI * 2);
+  // Sedikit ayunan daun → scene terasa hidup (seperti ditiup angin).
+  useFrame((state) => {
+    if (ref.current) ref.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.6 + phase.current) * 0.018;
+  });
   return (
-    <group position={position} rotation={[0, rotation, 0]} scale={[scale, scale, scale]}>
+    <group ref={ref} position={position} rotation={[0, rotation, 0]} scale={[scale, scale, scale]}>
       {Array.from({ length: 5 }).map((_, i) => {
         const t = i / 5;
         return (
@@ -794,9 +801,9 @@ export function SchoolEnvironment({
           <GongAgeng position={[6.2, 0, -3]} rotation={-0.9} scale={1.15} />
           <Bedug position={[-5.8, 0, 4.5]} rotation={0.7} />
           <Bedug position={[5.8, 0, 4.5]} rotation={-0.7} />
-          {/* Pohon beringin khas alun-alun */}
-          <PohonBeringin position={[-11, 0, -30]} scale={1.25} />
-          <PohonBeringin position={[11, 0, -33]} rotation={1.1} scale={1.05} />
+          {/* Pohon kelapa (satu-satunya vegetasi pohon) */}
+          <PohonKelapa position={[-11, 0, -30]} scale={1.25} />
+          <PohonKelapa position={[11, 0, -33]} rotation={1.1} scale={1.05} />
           {/* Wayang kulit pengapit kelir */}
           <WayangKulit position={[-6.7, 0, -28.5]} rotation={0.35} scale={1.35} />
           <WayangKulit position={[6.7, 0, -28.5]} rotation={-0.35} scale={1.35} color="#4a2418" />

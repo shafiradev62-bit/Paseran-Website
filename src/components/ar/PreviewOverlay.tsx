@@ -10,10 +10,10 @@ export const PREVIEW_STYLES: readonly PreviewStyle[] = [
 ];
 
 const STYLE_LABEL: Record<PreviewStyle, string> = {
-  cinematic: "SINEMATIK",
-  orbit: "ORBIT",
-  follow: "KEJAR",
-  aerial: "DRONE",
+  cinematic: "TAMPAK DINAMIS",
+  orbit: "TAMPAK ORBITAL",
+  follow: "TAMPAK SUSUL",
+  aerial: "TAMPAK UDARA",
 };
 
 type PreviewOverlayProps = {

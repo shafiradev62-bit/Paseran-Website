@@ -906,7 +906,14 @@ function CameraRig({
     if (isPreview && (previewStyle === "cinematic" || previewStyle === "follow") && followPos.current) {
       const offY = previewStyle === "cinematic" ? 1.15 : 0.7;
       const offZ = previewStyle === "cinematic" ? 3.6 : 3.2;
-      tmp.set(followPos.current.x, followPos.current.y + offY, followPos.current.z + offZ);
+      // Sedikit guncangan tangan (handheld) pada gaya sinematik → kesan hidup/film.
+      const sx = previewStyle === "cinematic" ? Math.sin(t * 1.7) * 0.05 + Math.sin(t * 0.9) * 0.03 : 0;
+      const sy = previewStyle === "cinematic" ? Math.cos(t * 1.3) * 0.04 : 0;
+      tmp.set(
+        followPos.current.x + sx,
+        followPos.current.y + offY + sy,
+        followPos.current.z + offZ,
+      );
       camera.position.lerp(tmp, k);
       aim.lerp(followPos.current, Math.min(1, dt * 12));
       camera.lookAt(aim);
