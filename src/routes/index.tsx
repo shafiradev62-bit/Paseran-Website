@@ -150,9 +150,14 @@ function Editor() {
   const [showVectors, setShowVectors] = useState(false);
   const [level, setLevel] = useState<1 | 2 | 3>(1);
   // Level pembelajaran (modul): preset fokus tiap tahap.
+  // Setiap level juga memilih bingkai kamera yang tetap MENGHADAP lintasan/
+  // sasaran (dan bangunan di sisi jauh), bukan membelakanginya.
   useEffect(() => {
     setShowTrajectory(true);
     setShowVectors(level === 2);
+    setCameraMode("orbit");
+    setSelected(level === 3 ? "target" : "lintasan");
+    setFocusTick((t) => t + 1);
   }, [level]);
   const [cameraMode, setCameraMode] = useState<"orbit" | "follow" | "side">("orbit");
   const [selected, setSelected] = useState<Selection>("murid");
