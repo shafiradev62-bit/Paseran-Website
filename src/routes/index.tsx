@@ -141,7 +141,7 @@ function Editor() {
   const notify = useNotify();
   const [angle, setAngle] = useState(45);
   const [velocity, setVelocity] = useState(14);
-  const [targetDistance, setTargetDistance] = useState(18);
+  const [targetDistance, setTargetDistance] = useState(20);
   const [drag, setDrag] = useState(0);
   const [wind, setWind] = useState(0);
   const [timeScale, setTimeScale] = useState(1);
@@ -552,7 +552,7 @@ function Editor() {
               }}
               onClick={() => {
                 setAngle(45);
-                setVelocity(12);
+                setVelocity(7);
                 setTargetDistance(5);
                 setDrag(0);
                 setWind(0);
@@ -561,7 +561,7 @@ function Editor() {
                 notify({
                   kind: "info",
                   title: "Preset: Latihan 5m",
-                  body: "θ=45° v₀=12 m/s — sasaran merapat ke dekat",
+                  body: "θ=45° v₀=7 m/s — sasaran merapat ke dekat",
                 });
               }}
               title="Latihan 5m"
@@ -579,7 +579,7 @@ function Editor() {
               }}
               onClick={() => {
                 setAngle(40);
-                setVelocity(16);
+                setVelocity(10);
                 setTargetDistance(10);
                 setDrag(0.012);
                 setWind(0);
@@ -588,7 +588,7 @@ function Editor() {
                 notify({
                   kind: "info",
                   title: "Preset: Kompetisi 10m",
-                  body: "θ=40° v₀=16 m/s k=0.012",
+                  body: "θ=40° v₀=10 m/s k=0.012",
                 });
               }}
               title="Kompetisi 10m"
@@ -606,16 +606,16 @@ function Editor() {
               }}
               onClick={() => {
                 setAngle(50);
-                setVelocity(18);
+                setVelocity(14);
                 setTargetDistance(10);
                 setDrag(0.03);
-                setWind(4.5);
+                setWind(3);
                 setSelected("target");
                 setFocusTick((t) => t + 1);
                 notify({
                   kind: "warn",
                   title: "Preset: Angin Kencang",
-                  body: "θ=50° v₀=18 m/s angin=4.5 m/s — perhatikan panah angin & lintasan melengkung",
+                  body: "θ=50° v₀=14 m/s angin=3 m/s — perhatikan panah angin & lintasan melengkung",
                 });
               }}
               title="Angin Kencang"

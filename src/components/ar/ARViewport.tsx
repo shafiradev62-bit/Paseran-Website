@@ -42,6 +42,7 @@ const HARDNESS_FACTOR: Record<TargetHardness, number> = {
 export type ZoneId = "kepala" | "leher" | "dada" | "kendil" | "bawah";
 export type MissType = "none" | "pendek" | "tinggi" | "rendah" | "melebar";
 
+export const TARGET_CENTER_X = 0; // center (lateral) of the target board
 export const TARGET_CENTER_Y = 1.5; // center height of the target board
 export const TARGET_HALF_H = 0.6; // board half-height (total 1.2 m)
 export const TARGET_HALF_W = 0.6; // board half-width (lateral limit)
@@ -1195,7 +1196,9 @@ function Scene(props: ViewportProps) {
       const k = (a[2] - planeZ) / span;
       const hy = a[1] + (b[1] - a[1]) * k;
       const lx = a[0] + (b[0] - a[0]) * k;
-      const lateral = lx - PLAYER_X[f.player];
+      // Papan target berada di tengah x=0; proyektil (tanpa angin) terbang di x=0.
+      // Lateral = offset proyektil dari pusat papan (x=0), BUKAN dari posisi pemain.
+      const lateral = lx - TARGET_CENTER_X;
       const res = resolveShot(lateral, hy);
       const hitPos: V3 = [lx, hy, planeZ + 0.06];
       const meta = res.zone ? ZONE_BANDS.find((z) => z.id === res.zone)! : null;

@@ -230,7 +230,10 @@
   align-items: center;
   justify-content: center;
   padding: 16px;
-  background: oklch(0.16 0.02 250);
+  background: oklch(0.16 0.02 250 / 0.5);
+  /* Non-blocking: biarkan klik menembus ke panel & scene agar user bisa
+     langsung mengatur ulang setelah lempar (tidak "terjebak" di modal). */
+  pointer-events: none;
   animation: result-modal-in 0.25s ease;
 }
 @keyframes result-modal-in {
@@ -251,6 +254,7 @@
   border-radius: 14px;
   padding: 20px 20px 16px;
   box-shadow: 0 18px 50px oklch(0 0 0 / 0.4);
+  pointer-events: auto;
 }
 .result-close {
   position: absolute;
