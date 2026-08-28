@@ -101,7 +101,7 @@ export function PreviewOverlay({
         <div className="preview-track">
           <div className="preview-fill" style={{ width: `${Math.round(progress * 100)}%` }} />
         </div>
-        <span className="preview-tag">{paused ? "DIJEDA" : STYLE_LABEL[style]}</span>
+        <span className="preview-tag">{STYLE_LABEL[style]}</span>
       </div>
 
       {lastRecord && (

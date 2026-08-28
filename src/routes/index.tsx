@@ -199,37 +199,14 @@ function Editor() {
   const [isARMode, setIsARMode] = useState(false);
   // ── Cinematic preview (YouTube-style auto-play) ──
   const [preview, setPreview] = useState(true);
-  const [previewPaused, setPreviewPaused] = useState(false);
   const [previewStyle, setPreviewStyle] = useState<PreviewStyle>("cinematic");
   const previewRef = useRef(preview);
   useEffect(() => {
     previewRef.current = preview;
   }, [preview]);
 
-  // Loop a silent throw while in preview mode (no notifications, like a video preview).
-  useEffect(() => {
-    if (!preview || previewPaused || running) return;
-    const id = window.setTimeout(() => {
-      setResult(null);
-      setLive({ t: 0, h: 0, x: 0, v: 0 });
-      setRunning(true);
-    }, 700);
-    return () => window.clearTimeout(id);
-  }, [preview, previewPaused, running]);
-
-  useEffect(() => {
-    if (!preview || previewPaused || !result) return;
-    const id = window.setTimeout(() => {
-      setRunning(false);
-      setResult(null);
-      setLive({ t: 0, h: 0, x: 0, v: 0 });
-      // Ganti gaya kamera tiap loop → preview makin variatif & keren.
-      setPreviewStyle((s) => PREVIEW_STYLES[(PREVIEW_STYLES.indexOf(s) + 1) % PREVIEW_STYLES.length] ?? s);
-    }, 1600);
-    return () => window.clearTimeout(id);
-  }, [preview, previewPaused, result]);
-
-  // Ganti gaya kamera tiap lemparan otomatis selesai (preview tetap variatif).
+  // Preview TIDAK autoplay. Tombol putar memicu satu lemparan MANUAL;
+  // gaya kamera ganti tiap lemparan selesai agar tetap variatif.
   const prevRunning = useRef(false);
   useEffect(() => {
     if (preview && prevRunning.current && !running) {
@@ -1016,7 +993,7 @@ function Editor() {
 
           {preview && (
             <PreviewOverlay
-              paused={previewPaused}
+              paused={running}
               progress={p.time > 0 ? Math.min(1, live.t / p.time) : 0}
               style={previewStyle}
               styles={PREVIEW_STYLES}
@@ -1026,7 +1003,12 @@ function Editor() {
                 setResult(null);
                 setLive({ t: 0, h: 0, x: 0, v: 0 });
               }}
-              onToggle={() => setPreviewPaused((v) => !v)}
+              onToggle={() => {
+                if (running) return;
+                setResult(null);
+                setLive({ t: 0, h: 0, x: 0, v: 0 });
+                setRunning(true);
+              }}
               onStyle={(s) => setPreviewStyle(s)}
               recording={recording}
               recordCount={records.length}
