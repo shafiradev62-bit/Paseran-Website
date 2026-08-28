@@ -56,11 +56,11 @@ const PLAYER_COLORS: Record<PlayerId, string> = { 1: "#e63946", 2: "#2a6fdb" };
 
 // Zone metadata (kept local so ARViewport stays lazily loaded)
 const ZONE_META: Record<string, { label: string; points: number }> = {
-  kepala: { label: "Sirah", points: 5 },
-  leher: { label: "Gulu", points: 4 },
-  dada: { label: "Dhada", points: 3 },
-  kendil: { label: "Kendil", points: 2 },
-  bawah: { label: "Ngisor", points: 1 },
+  kepala: { label: "Atas", points: 50 },
+  leher: { label: "Atas-Tengah", points: 30 },
+  dada: { label: "Tengah", points: 20 },
+  kendil: { label: "Bawah-Tengah", points: 10 },
+  bawah: { label: "Bawah", points: 5 },
 };
 
 function IconButton({
@@ -148,6 +148,12 @@ function Editor() {
   const [running, setRunning] = useState(false);
   const [showTrajectory, setShowTrajectory] = useState(true);
   const [showVectors, setShowVectors] = useState(false);
+  const [level, setLevel] = useState<1 | 2 | 3>(1);
+  // Level pembelajaran (modul): preset fokus tiap tahap.
+  useEffect(() => {
+    setShowTrajectory(true);
+    setShowVectors(level === 2);
+  }, [level]);
   const [cameraMode, setCameraMode] = useState<"orbit" | "follow" | "side">("orbit");
   const [selected, setSelected] = useState<Selection>("murid");
   const [focusTick, setFocusTick] = useState(0);
@@ -389,6 +395,27 @@ function Editor() {
               active={cameraMode === "side"}
               onClick={() => setCameraMode("side")}
             />
+          </div>
+
+          <div className="toolgroup level-switch">
+            <span className="lbl">Level</span>
+            {([1, 2, 3] as const).map((lv) => (
+              <button
+                key={lv}
+                type="button"
+                className={`iconbtn${level === lv ? " is-active" : ""}`}
+                onClick={() => setLevel(lv)}
+                title={
+                  lv === 1
+                    ? "Level 1 · Observasi Lintasan"
+                    : lv === 2
+                      ? "Level 2 · Dekomposisi Vektor (vx, vy)"
+                      : "Level 3 · Optimasi Sasaran (θ optimum)"
+                }
+              >
+                L{lv}
+              </button>
+            ))}
           </div>
 
           <div className="toolgroup">
@@ -742,6 +769,18 @@ function Editor() {
             <div className="hud-cell">
               <span>Jarak (x)</span>
               <strong>{live.x.toFixed(2)} m</strong>
+            </div>
+            <div className="hud-cell">
+              <span>vx (konstan)</span>
+              <strong>
+                {(effectiveVelocity * Math.cos((angle * Math.PI) / 180)).toFixed(2)} m/s
+              </strong>
+            </div>
+            <div className="hud-cell">
+              <span>vy (t)</span>
+              <strong>
+                {(effectiveVelocity * Math.sin((angle * Math.PI) / 180) - G * live.t).toFixed(2)} m/s
+              </strong>
             </div>
           </div>
 

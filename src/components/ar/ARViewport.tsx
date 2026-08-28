@@ -37,43 +37,29 @@ const HARDNESS_FACTOR: Record<TargetHardness, number> = {
   banana: 0.4,
 };
 
-// ── Scoring zones of the Jemparingan ring target (lingkaran panahan) ───────
+// ── Scoring zones: 5 pita horizontal (atas → bawah), sesuai modul spec ──────
+// 50 poin (paling atas / paling sulit) → 5 poin (paling bawah).
 export type ZoneId = "kepala" | "leher" | "dada" | "kendil" | "bawah";
 export type MissType = "none" | "pendek" | "tinggi" | "rendah" | "melebar";
 
-export const TARGET_CENTER_Y = 1.5; // center height of the ring target
+export const TARGET_CENTER_Y = 1.5; // center height of the target board
+export const TARGET_HALF_H = 0.6; // board half-height (total 1.2 m)
+export const TARGET_HALF_W = 0.6; // board half-width (lateral limit)
 
-// Ring radii (from center outward) for each scoring zone
-export const ZONE_RINGS: {
+// Pita skor berjenjang berdasarkan ketinggian y saat x_paser >= x_papan.
+export const ZONE_BANDS: {
   id: ZoneId;
   label: string;
-  innerR: number;
-  outerR: number;
+  yTop: number; // offset dari pusat (atas, +)
+  yBottom: number; // offset dari pusat (bawah, -)
   points: number;
   color: string;
 }[] = [
-  { id: "kepala", label: "Sirah", innerR: 0, outerR: 0.15, points: 5, color: "#f4c430" },
-  { id: "leher", label: "Gulu", innerR: 0.15, outerR: 0.32, points: 4, color: "#e07b39" },
-  { id: "dada", label: "Dhada", innerR: 0.32, outerR: 0.52, points: 3, color: "#5b8fbf" },
-  { id: "kendil", label: "Kendil", innerR: 0.52, outerR: 0.75, points: 2, color: "#6fae7a" },
-  { id: "bawah", label: "Ngisor", innerR: 0.75, outerR: 1.0, points: 1, color: "#9a8c6a" },
-];
-
-// Legacy ZONES array kept for compatibility (height-based for resolveShot fallback)
-export const ZONES: {
-  id: ZoneId;
-  label: string;
-  min: number;
-  max: number;
-  points: number;
-  color: string;
-  yc: number;
-}[] = [
-  { id: "kepala", label: "Sirah", min: 0, max: 0.15, points: 5, color: "#f4c430", yc: 0.075 },
-  { id: "leher", label: "Gulu", min: 0.15, max: 0.32, points: 4, color: "#e07b39", yc: 0.235 },
-  { id: "dada", label: "Dhada", min: 0.32, max: 0.52, points: 3, color: "#5b8fbf", yc: 0.42 },
-  { id: "kendil", label: "Kendil", min: 0.52, max: 0.75, points: 2, color: "#6fae7a", yc: 0.635 },
-  { id: "bawah", label: "Ngisor", min: 0.75, max: 1.0, points: 1, color: "#9a8c6a", yc: 0.875 },
+  { id: "kepala", label: "Atas", yTop: 0.6, yBottom: 0.25, points: 50, color: "#e63946" },
+  { id: "leher", label: "Atas-Tengah", yTop: 0.25, yBottom: 0.08, points: 30, color: "#f4a261" },
+  { id: "dada", label: "Tengah", yTop: 0.08, yBottom: -0.08, points: 20, color: "#e9c46a" },
+  { id: "kendil", label: "Bawah-Tengah", yTop: -0.08, yBottom: -0.25, points: 10, color: "#2a9d8f" },
+  { id: "bawah", label: "Bawah", yTop: -0.25, yBottom: -0.6, points: 5, color: "#264653" },
 ];
 
 export const WIRE_Y = 2.78;
@@ -154,15 +140,13 @@ function resolveShot(
   lateral: number,
   height: number,
 ): { zone: ZoneId | null; points: number; missType: MissType } {
-  // Ring target: compute radial distance from target center
-  const dy = height - TARGET_CENTER_Y;
-  const radialDist = Math.sqrt(lateral * lateral + dy * dy);
-  if (radialDist > ZONE_RINGS[ZONE_RINGS.length - 1]!.outerR + 0.15)
-    return { zone: null, points: 0, missType: "melebar" };
-  const z = ZONE_RINGS.find((zz) => radialDist >= zz.innerR && radialDist <= zz.outerR);
-  if (z) return { zone: z.id, points: z.points, missType: "none" };
-  if (radialDist > ZONE_RINGS[ZONE_RINGS.length - 1]!.outerR)
-    return { zone: null, points: 0, missType: "tinggi" };
+  // Spec: saat x_paser >= x_papan, evaluasi y_paser → tentukan pita skor.
+  if (Math.abs(lateral) > TARGET_HALF_W + 0.1) return { zone: null, points: 0, missType: "melebar" };
+  const dy = height - TARGET_CENTER_Y; // offset vertikal dari pusat papan
+  if (dy > TARGET_HALF_H) return { zone: null, points: 0, missType: "tinggi" };
+  if (dy < -TARGET_HALF_H) return { zone: null, points: 0, missType: "rendah" };
+  const band = ZONE_BANDS.find((b) => dy <= b.yTop && dy >= b.yBottom);
+  if (band) return { zone: band.id, points: band.points, missType: "none" };
   return { zone: null, points: 0, missType: "rendah" };
 }
 
@@ -393,8 +377,8 @@ function TargetJemparingan({
     onPointerOut: () => setHover((h) => (h === zid ? null : h)),
   });
 
-  // Build concentric rings from outside in (so inner rings render on top)
-  const rings = [...ZONE_RINGS].reverse();
+  // Build horizontal score bands (top → bottom)
+  const bands = ZONE_BANDS;
 
   return (
     <group
@@ -430,30 +414,26 @@ function TargetJemparingan({
         </mesh>
       ))}
 
-      {/* ring target disc (vertical, facing the thrower) */}
+      {/* papan sasaran berpita horizontal (vertical, facing the thrower) */}
       <group ref={groupRef} position={[0, TARGET_CENTER_Y, 0]}>
         {/* Back board */}
-        <mesh position={[0, 0, -0.025]} castShadow>
-          <circleGeometry args={[1.05, 48]} />
+        <mesh position={[0, 0, -0.03]} castShadow>
+          <planeGeometry args={[1.3, 1.3]} />
           <meshStandardMaterial color="#5a3a1a" roughness={0.95} />
         </mesh>
 
-        {/* Concentric rings — rendered from largest (outermost) to smallest */}
-        {rings.map((ring) => {
-          const isLit = litZone === ring.id;
+        {/* Pita skor horizontal — atas (50) → bawah (5) */}
+        {bands.map((b) => {
+          const isLit = litZone === b.id;
+          const h = b.yTop - b.yBottom;
+          const yc = (b.yTop + b.yBottom) / 2;
           return (
-            <mesh
-              key={ring.id}
-              position={[0, 0, 0.001]}
-              rotation={[0, 0, 0]}
-              castShadow
-              {...zoneEvents(ring.id)}
-            >
-              <ringGeometry args={[ring.innerR, ring.outerR, 64]} />
+            <mesh key={b.id} position={[0, yc, 0.01]} castShadow {...zoneEvents(b.id)}>
+              <planeGeometry args={[1.1, h]} />
               <meshStandardMaterial
-                color={isLit ? "#fff1bd" : ring.color}
-                emissive={ring.color}
-                emissiveIntensity={isLit ? 0.55 : 0}
+                color={isLit ? "#fff1bd" : b.color}
+                emissive={b.color}
+                emissiveIntensity={isLit ? 0.5 : 0}
                 roughness={0.85}
                 side={THREE.DoubleSide}
               />
@@ -461,38 +441,27 @@ function TargetJemparingan({
           );
         })}
 
-        {/* Center bullseye dot */}
-        <mesh position={[0, 0, 0.005]}>
-          <circleGeometry args={[0.04, 16]} />
-          <meshStandardMaterial color="#1a1a1a" roughness={0.6} />
-        </mesh>
-
-        {/* Thin gold ring at center for visual pop */}
-        <mesh position={[0, 0, 0.006]}>
-          <ringGeometry args={[0.14, 0.155, 48]} />
-          <meshStandardMaterial
-            color="#d9a441"
-            emissive="#d9a441"
-            emissiveIntensity={0.3}
-            roughness={0.5}
-          />
+        {/* Garis pemisah tengah (referensi) */}
+        <mesh position={[0, 0, 0.02]}>
+          <planeGeometry args={[1.1, 0.014]} />
+          <meshStandardMaterial color="#1a1a1a" />
         </mesh>
       </group>
 
       {/* Zone labels beside the target */}
-      {ZONE_RINGS.map((z, i) => {
-        const yOff = TARGET_CENTER_Y + 0.75 - i * 0.28;
+      {ZONE_BANDS.map((b) => {
+        const yc = TARGET_CENTER_Y + (b.yTop + b.yBottom) / 2;
         return (
           <Html
-            key={z.id}
-            position={[1.3, yOff, 0]}
+            key={b.id}
+            position={[1.35, yc, 0]}
             center
             distanceFactor={13}
             zIndexRange={[30, 0]}
             style={{ pointerEvents: "none" }}
           >
-            <div className="world-tag zone-tag" style={{ borderColor: z.color, color: "#ffffff" }}>
-              {z.label} · {z.points} Poin
+            <div className="world-tag zone-tag" style={{ borderColor: b.color, color: "#ffffff" }}>
+              {b.label} · {b.points} Poin
             </div>
           </Html>
         );
@@ -1226,7 +1195,7 @@ function Scene(props: ViewportProps) {
       const lateral = lx - PLAYER_X[f.player];
       const res = resolveShot(lateral, hy);
       const hitPos: V3 = [lx, hy, planeZ + 0.06];
-      const meta = res.zone ? ZONES.find((z) => z.id === res.zone)! : null;
+      const meta = res.zone ? ZONE_BANDS.find((z) => z.id === res.zone)! : null;
       // ── Impact physics calculation ──
       const mSpeed = f.impactSpeed || Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]) / STEP;
       const impactE = 0.5 * dartMass * mSpeed * mSpeed;

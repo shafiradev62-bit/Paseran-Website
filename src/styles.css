@@ -428,6 +428,20 @@ body,
 .iconbtn.is-active:hover {
   background: oklch(0.81 0.05 235);
 }
+.level-switch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.level-switch .lbl {
+  font-size: 11px;
+  color: var(--ed-ink-soft);
+  margin-right: 2px;
+}
+.level-switch .iconbtn {
+  min-width: 34px;
+  font-weight: 700;
+}
 .iconbtn.is-solid {
   background: var(--ed-ink);
   color: var(--ed-panel);
