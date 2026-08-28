@@ -50,7 +50,7 @@ export const Route = createFileRoute("/")({
   component: Page,
 });
 
-const G = 9.81;
+const G = 9.8;
 
 const PLAYER_COLORS: Record<PlayerId, string> = { 1: "#e63946", 2: "#2a6fdb" };
 
@@ -219,7 +219,7 @@ function Editor() {
   const onTick = useCallback((t: number, pos: [number, number, number], speed: number) => {
     liveRef.current = { t, h: pos[1], x: pos[0], v: speed };
     const now = performance.now();
-    if (now - lastLivePush.current >= 80) {
+    if (now - lastLivePush.current >= 100) {
       lastLivePush.current = now;
       setLive(liveRef.current);
     }

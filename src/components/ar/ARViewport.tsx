@@ -13,7 +13,7 @@ import { makeKawungTexture, SchoolEnvironment } from "./SchoolEnvironment";
 import { setXRRenderer } from "./xr";
 import { playGong, playThud } from "@/lib/audio";
 
-const G = 9.81;
+const G = 9.8;
 const RHO_AIR = 1.225; // kg/m³ air density at sea level
 const LAUNCH_H = 1.55;
 const THROWER_Y_OFFSET = 1.5;
@@ -1427,7 +1427,7 @@ function Scene(props: ViewportProps) {
 
 // ═══════════════════════════════ COMPONENT ═══════════════════════════════════
 
-export function ARViewport(props: ViewportProps) {
+export const ARViewport = memo(function ARViewport(props: ViewportProps) {
   const [dpr, setDpr] = useState(1.5);
   return (
     <div className="viewport-stage">
@@ -1465,6 +1465,6 @@ export function ARViewport(props: ViewportProps) {
       )}
     </div>
   );
-}
+});
 
 export default ARViewport;
