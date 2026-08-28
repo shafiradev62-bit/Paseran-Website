@@ -1744,6 +1744,9 @@ body,
   bottom: 64px;
   transform: translateX(-50%);
   max-width: 92%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   padding: 7px 14px;
   border-radius: 999px;
   background: oklch(0.18 0.02 250 / 0.62);
@@ -1754,7 +1757,25 @@ body,
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  pointer-events: none;
+}
+.preview-record-readout .rec-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.preview-record-readout .rec-clear {
+  flex: none;
+  border: 1px solid oklch(1 0 0 / 0.5);
+  background: transparent;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.preview-record-readout .rec-clear:hover {
+  background: oklch(1 0 0 / 0.18);
 }
 .preview-play {
   pointer-events: auto;

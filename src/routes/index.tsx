@@ -180,23 +180,51 @@ function Editor() {
   const [recording, setRecording] = useState(false);
   const [records, setRecords] = useState<ThrowRecord[]>([]);
   const lastRecResult = useRef<ShotResult | null>(null);
+  const clearRecords = useCallback(() => {
+    setRecords([]);
+    lastRecResult.current = null;
+  }, []);
   useEffect(() => {
     if (recording && result && lastRecResult.current !== result) {
       lastRecResult.current = result;
-      setRecords((rs) => [
-        ...rs,
-        {
-          angle,
-          velocity,
-          range: result.range,
-          maxH: result.maxH,
-          time: result.time,
-          points: result.points,
-          hit: result.hit,
-        },
-      ]);
+      // Ring buffer: batasi agar rekam berjam-jam di depan client tetap ringan.
+      setRecords((rs) => {
+        const next = [
+          ...rs,
+          {
+            angle,
+            velocity,
+            range: result.range,
+            maxH: result.maxH,
+            time: result.time,
+            points: result.points,
+            hit: result.hit,
+          },
+        ];
+        return next.length > 500 ? next.slice(next.length - 500) : next;
+      });
     }
   }, [result, recording, angle, velocity]);
+  // Readout rekam di-memo agar tidak dibuat ulang tiap render (anti jank).
+  const lastRecord = useMemo<{
+    angle: number;
+    velocity: number;
+    range: number;
+    maxH: number;
+    points: number;
+    hit: boolean;
+  } | null>(() => {
+    if (!records.length) return null;
+    const r = records[records.length - 1]!;
+    return {
+      angle: r.angle,
+      velocity: r.velocity,
+      range: r.range,
+      maxH: r.maxH,
+      points: r.points,
+      hit: r.hit,
+    };
+  }, [records]);
   const [attempts, setAttempts] = useState(0);
   const [hits, setHits] = useState(0);
   const [best, setBest] = useState<number | null>(null);
@@ -1030,18 +1058,8 @@ function Editor() {
               recording={recording}
               recordCount={records.length}
               onToggleRecord={() => setRecording((v) => !v)}
-              lastRecord={
-                records.length
-                  ? {
-                      angle: records[records.length - 1]!.angle,
-                      velocity: records[records.length - 1]!.velocity,
-                      range: records[records.length - 1]!.range,
-                      maxH: records[records.length - 1]!.maxH,
-                      points: records[records.length - 1]!.points,
-                      hit: records[records.length - 1]!.hit,
-                    }
-                  : null
-              }
+              onClearRecords={clearRecords}
+              lastRecord={lastRecord}
             />
           )}
         </main>

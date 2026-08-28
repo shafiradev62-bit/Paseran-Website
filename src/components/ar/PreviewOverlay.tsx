@@ -36,6 +36,7 @@ type PreviewOverlayProps = {
   recording?: boolean;
   recordCount?: number;
   onToggleRecord?: () => void;
+  onClearRecords?: () => void;
   lastRecord?: RecordEntry | null;
 };
 
@@ -50,6 +51,7 @@ export function PreviewOverlay({
   recording = false,
   recordCount = 0,
   onToggleRecord,
+  onClearRecords,
   lastRecord,
 }: PreviewOverlayProps) {
   const cinematic = style === "cinematic" || style === "aerial";
@@ -106,9 +108,21 @@ export function PreviewOverlay({
 
       {lastRecord && (
         <div className="preview-record-readout">
-          📋 θ {lastRecord.angle}° · v₀ {lastRecord.velocity.toFixed(1)} m/s · x{" "}
-          {lastRecord.range.toFixed(2)} m · H {lastRecord.maxH.toFixed(2)} m ·{" "}
-          {lastRecord.hit ? `+${lastRecord.points} Poin` : "Miss"}
+          <span className="rec-text">
+            📋 θ {lastRecord.angle}° · v₀ {lastRecord.velocity.toFixed(1)} m/s · x{" "}
+            {lastRecord.range.toFixed(2)} m · H {lastRecord.maxH.toFixed(2)} m ·{" "}
+            {lastRecord.hit ? `+${lastRecord.points} Poin` : "Miss"}
+          </span>
+          {onClearRecords && (
+            <button
+              type="button"
+              className="rec-clear"
+              onClick={onClearRecords}
+              title="Bersihkan rekam (mulai demo baru)"
+            >
+              Reset
+            </button>
+          )}
         </div>
       )}
 
