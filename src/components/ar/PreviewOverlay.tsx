@@ -69,7 +69,7 @@ export function PreviewOverlay({
           onClick={onToggle}
           aria-label={paused ? "Putar" : "Jeda"}
         >
-          {paused ? <Play size={16} /> : <Pause size={16} />}
+          {paused ? <Pause size={16} /> : <Play size={16} />}
         </button>
         <div className="preview-track">
           <div className="preview-fill" style={{ width: `${Math.round(progress * 100)}%` }} />
