@@ -158,6 +158,10 @@ function Editor() {
   const [selected, setSelected] = useState<Selection>("murid");
   const [focusTick, setFocusTick] = useState(0);
   const [result, setResult] = useState<ShotResult | null>(null);
+  const [resultModalOpen, setResultModalOpen] = useState(false);
+  useEffect(() => {
+    if (result) setResultModalOpen(true);
+  }, [result]);
   const [attempts, setAttempts] = useState(0);
   const [hits, setHits] = useState(0);
   const [best, setBest] = useState<number | null>(null);
@@ -809,7 +813,7 @@ function Editor() {
             </div>
           )}
 
-          {result && (
+          {result && !resultModalOpen && (
             <div className={`hud result ${result.hit ? "is-hit" : ""}`}>
               <span className="result-flag">{result.hit ? "TEPAT SASARAN" : "MELESET"}</span>
               <span className="sep" />
@@ -845,6 +849,124 @@ function Editor() {
 
           {/* In-app notifications, anchored inside the viewport */}
           <ToastStack />
+
+          {/* Popup hasil di tengah layar setelah lempar — bergaya panel kontrol */}
+          {resultModalOpen && result && !preview && (
+            <div
+              className="result-modal"
+              onClick={() => setResultModalOpen(false)}
+              role="dialog"
+              aria-modal="true"
+            >
+              <div className="result-card" onClick={(e) => e.stopPropagation()}>
+                <button
+                  className="result-close"
+                  type="button"
+                  onClick={() => setResultModalOpen(false)}
+                  aria-label="Tutup"
+                >
+                  ×
+                </button>
+
+                <div className={`result-flag-big ${result.hit ? "is-hit" : ""}`}>
+                  {result.hit ? "TEPAT SASARAN" : "MELESET"}
+                </div>
+                {result.zone && ZONE_META[result.zone] ? (
+                  <div className="result-zone">
+                    {ZONE_META[result.zone]?.label} ·{" "}
+                    <strong>+{ZONE_META[result.zone]?.points}</strong> Poin
+                  </div>
+                ) : (
+                  <div className="result-zone">Tidak mengenai papan</div>
+                )}
+
+                <div className="panel-head">Parameter Lemparan</div>
+                <div className="result-params">
+                  <div className="field">
+                    <div className="field-top">
+                      <span>Mode</span>
+                    </div>
+                    <div className="mode-static">🤾 Lemparan Tangan (manual)</div>
+                  </div>
+                  <Slider
+                    label="Sudut Elevasi (θ)"
+                    value={angle}
+                    min={10}
+                    max={80}
+                    step={1}
+                    unit="°"
+                    onChange={setAngle}
+                  />
+                  <Slider
+                    label="Kecepatan Awal (v₀)"
+                    value={velocity}
+                    min={5}
+                    max={26}
+                    step={0.5}
+                    unit="m/s"
+                    onChange={setVelocity}
+                  />
+                  <Slider
+                    label="Jarak Target"
+                    value={targetDistance}
+                    min={5}
+                    max={38}
+                    step={1}
+                    unit="m"
+                    onChange={setTargetDistance}
+                  />
+                </div>
+
+                <div className="panel-head">Hasil Analitik</div>
+                <div className="stat-grid">
+                  <div className="stat">
+                    <span>Jangkauan (R)</span>
+                    <strong>{result.range.toFixed(2)} m</strong>
+                  </div>
+                  <div className="stat">
+                    <span>Tinggi Maks (H)</span>
+                    <strong>{result.maxH.toFixed(2)} m</strong>
+                  </div>
+                  <div className="stat">
+                    <span>Waktu (t)</span>
+                    <strong>{result.time.toFixed(2)} s</strong>
+                  </div>
+                  <div className="stat">
+                    <span>vx (konstan)</span>
+                    <strong>
+                      {(velocity * Math.cos((angle * Math.PI) / 180)).toFixed(2)} m/s
+                    </strong>
+                  </div>
+                  <div className="stat">
+                    <span>vy (t)</span>
+                    <strong>
+                      {(velocity * Math.sin((angle * Math.PI) / 180) - G * result.time).toFixed(2)} m/s
+                    </strong>
+                  </div>
+                </div>
+
+                <div className="result-actions">
+                  <button
+                    className="btn-game primary"
+                    type="button"
+                    onClick={() => {
+                      setResultModalOpen(false);
+                      throwNow();
+                    }}
+                  >
+                    Lempar Lagi
+                  </button>
+                  <button
+                    className="btn-game"
+                    type="button"
+                    onClick={() => setResultModalOpen(false)}
+                  >
+                    Tutup
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {preview && (
             <PreviewOverlay
