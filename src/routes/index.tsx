@@ -162,6 +162,36 @@ function Editor() {
   useEffect(() => {
     if (result) setResultModalOpen(true);
   }, [result]);
+
+  type ThrowRecord = {
+    angle: number;
+    velocity: number;
+    range: number;
+    maxH: number;
+    time: number;
+    points: number;
+    hit: boolean;
+  };
+  const [recording, setRecording] = useState(false);
+  const [records, setRecords] = useState<ThrowRecord[]>([]);
+  const lastRecResult = useRef<ShotResult | null>(null);
+  useEffect(() => {
+    if (recording && result && lastRecResult.current !== result) {
+      lastRecResult.current = result;
+      setRecords((rs) => [
+        ...rs,
+        {
+          angle,
+          velocity,
+          range: result.range,
+          maxH: result.maxH,
+          time: result.time,
+          points: result.points,
+          hit: result.hit,
+        },
+      ]);
+    }
+  }, [result, recording, angle, velocity]);
   const [attempts, setAttempts] = useState(0);
   const [hits, setHits] = useState(0);
   const [best, setBest] = useState<number | null>(null);
@@ -813,7 +843,7 @@ function Editor() {
             </div>
           )}
 
-          {result && !resultModalOpen && (
+          {result && !resultModalOpen && !preview && (
             <div className={`hud result ${result.hit ? "is-hit" : ""}`}>
               <span className="result-flag">{result.hit ? "TEPAT SASARAN" : "MELESET"}</span>
               <span className="sep" />
@@ -982,6 +1012,21 @@ function Editor() {
               }}
               onToggle={() => setPreviewPaused((v) => !v)}
               onStyle={(s) => setPreviewStyle(s)}
+              recording={recording}
+              recordCount={records.length}
+              onToggleRecord={() => setRecording((v) => !v)}
+              lastRecord={
+                records.length
+                  ? {
+                      angle: records[records.length - 1]!.angle,
+                      velocity: records[records.length - 1]!.velocity,
+                      range: records[records.length - 1]!.range,
+                      maxH: records[records.length - 1]!.maxH,
+                      points: records[records.length - 1]!.points,
+                      hit: records[records.length - 1]!.hit,
+                    }
+                  : null
+              }
             />
           )}
         </main>

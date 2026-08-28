@@ -16,6 +16,15 @@ const STYLE_LABEL: Record<PreviewStyle, string> = {
   aerial: "TAMPAK UDARA",
 };
 
+export type RecordEntry = {
+  angle: number;
+  velocity: number;
+  range: number;
+  maxH: number;
+  points: number;
+  hit: boolean;
+};
+
 type PreviewOverlayProps = {
   paused: boolean;
   progress: number;
@@ -24,6 +33,10 @@ type PreviewOverlayProps = {
   onSkip: () => void;
   onToggle: () => void;
   onStyle: (s: PreviewStyle) => void;
+  recording?: boolean;
+  recordCount?: number;
+  onToggleRecord?: () => void;
+  lastRecord?: RecordEntry | null;
 };
 
 export function PreviewOverlay({
@@ -34,6 +47,10 @@ export function PreviewOverlay({
   onSkip,
   onToggle,
   onStyle,
+  recording = false,
+  recordCount = 0,
+  onToggleRecord,
+  lastRecord,
 }: PreviewOverlayProps) {
   const cinematic = style === "cinematic" || style === "aerial";
   return (
@@ -71,11 +88,29 @@ export function PreviewOverlay({
         >
           {paused ? <Pause size={16} /> : <Play size={16} />}
         </button>
+        <button
+          className={`preview-rec${recording ? " is-on" : ""}`}
+          type="button"
+          onClick={onToggleRecord}
+          aria-label="Rekam lemparan"
+          title="Rekam lemparan (koordinat)"
+        >
+          <span className="rec-dot" />
+          Rekam{recording ? ` · ${recordCount}` : ""}
+        </button>
         <div className="preview-track">
           <div className="preview-fill" style={{ width: `${Math.round(progress * 100)}%` }} />
         </div>
         <span className="preview-tag">{paused ? "DIJEDA" : STYLE_LABEL[style]}</span>
       </div>
+
+      {lastRecord && (
+        <div className="preview-record-readout">
+          📋 θ {lastRecord.angle}° · v₀ {lastRecord.velocity.toFixed(1)} m/s · x{" "}
+          {lastRecord.range.toFixed(2)} m · H {lastRecord.maxH.toFixed(2)} m ·{" "}
+          {lastRecord.hit ? `+${lastRecord.points} Poin` : "Miss"}
+        </div>
+      )}
 
       {cinematic && (
         <>
