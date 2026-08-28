@@ -199,7 +199,10 @@ function integratePath3D(
   while (h > 0 && t < 120) {
     const v = Math.hypot(vd, vh, vw);
 
-    if (aero && aero.featherArea > 0 && v > 0.01) {
+    // Aerodinamika bulu (realistis) hanya aktif bila hambatan udara nyala,
+    // sehingga default (drag = 0) persis model ideal sesuai spesifikasi:
+    // vx = v₀·cosθ konstan, vy = v₀·sinθ − gt, R = v₀²·sin(2θ)/g.
+    if (aero && aero.featherArea > 0 && drag > 0 && v > 0.01) {
       // ── Feather aerodynamic drag force ──
       // Fd = 0.5 * rho * v² * A * Cd
       const Fd = 0.5 * RHO_AIR * v * v * aero.featherArea * aero.featherCd;
