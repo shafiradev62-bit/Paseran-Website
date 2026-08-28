@@ -1397,7 +1397,9 @@ function Scene(props: ViewportProps) {
 // ═══════════════════════════════ COMPONENT ═══════════════════════════════════
 
 export const ARViewport = memo(function ARViewport(props: ViewportProps) {
-  const [dpr, setDpr] = useState(1.5);
+  // Mulai di resolusi rendah agar mulus di GPU lemah (Athlon dsb);
+  // PerformanceMonitor naikkan bertahap hanya bila GPU sanggup.
+  const [dpr, setDpr] = useState(1);
   return (
     <div className="viewport-stage">
       <Canvas
@@ -1421,8 +1423,8 @@ export const ARViewport = memo(function ARViewport(props: ViewportProps) {
         {/* Adaptif: turunkan resolusi saat GPU berat → tetap mulus & ringan */}
         <PerformanceMonitor
           flipflops={3}
-          onDecline={() => setDpr(1)}
-          onIncline={() => setDpr(1.5)}
+          onDecline={() => setDpr(0.75)}
+          onIncline={() => setDpr(1.25)}
         />
         <AdaptiveDpr pixelated />
         <AdaptiveEvents />

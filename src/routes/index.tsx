@@ -248,7 +248,10 @@ function Editor() {
   );
 
   const handleSelect = useCallback((s: Selection | null) => {
-    if (s) setSelected(s);
+    if (s) {
+      setSelected(s);
+      setFocusTick((t) => t + 1);
+    }
   }, []);
 
   const onTick = useCallback((t: number, pos: [number, number, number], speed: number) => {
@@ -387,19 +390,28 @@ function Editor() {
               icon={Move3d}
               label="Murid"
               active={selected === "murid"}
-              onClick={() => setSelected("murid")}
+              onClick={() => {
+                setSelected("murid");
+                setFocusTick((t) => t + 1);
+              }}
             />
             <IconButton
               icon={Crosshair}
               label="Target"
               active={selected === "target"}
-              onClick={() => setSelected("target")}
+              onClick={() => {
+                setSelected("target");
+                setFocusTick((t) => t + 1);
+              }}
             />
             <IconButton
               icon={Spline}
               label="Lintasan"
               active={selected === "lintasan"}
-              onClick={() => setSelected("lintasan")}
+              onClick={() => {
+                setSelected("lintasan");
+                setFocusTick((t) => t + 1);
+              }}
             />
             <IconButton
               icon={Scan}
