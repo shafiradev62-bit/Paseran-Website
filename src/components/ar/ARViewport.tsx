@@ -308,6 +308,7 @@ type FlightState = {
   T: number;
   maxH: number;
   crossed: boolean;
+  checkedIdx: number;
   result: ShotResult | null;
   pts: V3[];
   player: PlayerId;
@@ -1088,6 +1089,7 @@ function Scene(props: ViewportProps) {
     T: 0,
     maxH: LAUNCH_H,
     crossed: false,
+    checkedIdx: 0,
     result: null,
     pts: [],
     player: 1,
@@ -1136,6 +1138,7 @@ function Scene(props: ViewportProps) {
       T: path.time,
       maxH: path.maxH,
       crossed: false,
+      checkedIdx: 0,
       result: null,
       pts: path.pts.map(([w, h, d]) => [originX + w, h, LAUNCH_Z - d] as V3),
       player: turn,
@@ -1194,61 +1197,76 @@ function Scene(props: ViewportProps) {
     const sp = Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]) / STEP;
     tickCb.current(f.t, [downrange, cy, 0], sp);
 
-    /* crossing the target plane → scoring */
+    /* crossing the target plane → scoring.
+       Scan semua segmen sejak frame sebelumnya: tiap frame melompati ~4
+       sampel (dt ~1/60 dipadatkan dengan STEP 1/240), sehingga memeriksa
+       hanya segmen (i, i+1) bisa melewatkan satu-satunya titik potong dan
+       membuat SEMUA lemparan tercatat meleset. */
     const planeZ = LAUNCH_Z - targetDistance;
-    if (!f.crossed && a[2] >= planeZ && b[2] < planeZ) {
-      f.crossed = true;
-      const span = a[2] - b[2] || 1e-6;
-      const k = (a[2] - planeZ) / span;
-      const hy = a[1] + (b[1] - a[1]) * k;
-      const lx = a[0] + (b[0] - a[0]) * k;
-      // Papan target berada di tengah x=0; proyektil (tanpa angin) terbang di x=0.
-      // Lateral = offset proyektil dari pusat papan (x=0), BUKAN dari posisi pemain.
-      const lateral = lx - TARGET_CENTER_X;
-      const res = resolveShot(lateral, hy);
-      const hitPos: V3 = [lx, hy, planeZ + 0.06];
-      const meta = res.zone ? ZONE_BANDS.find((z) => z.id === res.zone)! : null;
-      // ── Impact physics calculation ──
-      const mSpeed = f.impactSpeed || Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]) / STEP;
-      const impactE = 0.5 * dartMass * mSpeed * mSpeed;
-      const hardnessF = HARDNESS_FACTOR[targetHardness] ?? 0.25;
-      // Penetration depth: deeper when faster, sharper needle, softer target
-      const penDepth = Math.min(0.06, (impactE * needleSharpness * (1 - hardnessF)) / 2.5);
-      const angleEntry = Math.atan2(Math.abs(b[1] - a[1]), Math.abs(b[2] - a[2])) * (180 / Math.PI);
-      const didStick = penDepth > 0.008 && res.zone !== null;
+    if (!f.crossed) {
+      const from = f.checkedIdx;
+      const to = i;
+      for (let j = from; j <= to; j++) {
+        const p0 = f.pts[j];
+        const p1 = f.pts[j + 1];
+        if (!p0 || !p1) break;
+        if (p0[2] >= planeZ && p1[2] < planeZ) {
+          f.crossed = true;
+          const span = p0[2] - p1[2] || 1e-6;
+          const k = (p0[2] - planeZ) / span;
+          const hy = p0[1] + (p1[1] - p0[1]) * k;
+          const lx = p0[0] + (p1[0] - p0[0]) * k;
+          // Papan target berada di tengah x=0; proyektil (tanpa angin) terbang di x=0.
+          // Lateral = offset proyektil dari pusat papan (x=0), BUKAN dari posisi pemain.
+          const lateral = lx - TARGET_CENTER_X;
+          const res = resolveShot(lateral, hy);
+          const hitPos: V3 = [lx, hy, planeZ + 0.06];
+          const meta = res.zone ? ZONE_BANDS.find((z) => z.id === res.zone)! : null;
+          // ── Impact physics calculation ──
+          const mSpeed = f.impactSpeed || Math.hypot(p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]) / STEP;
+          const impactE = 0.5 * dartMass * mSpeed * mSpeed;
+          const hardnessF = HARDNESS_FACTOR[targetHardness] ?? 0.25;
+          // Penetration depth: deeper when faster, sharper needle, softer target
+          const penDepth = Math.min(0.06, (impactE * needleSharpness * (1 - hardnessF)) / 2.5);
+          const angleEntry = Math.atan2(Math.abs(p1[1] - p0[1]), Math.abs(p1[2] - p0[2])) * (180 / Math.PI);
+          const didStick = penDepth > 0.008 && res.zone !== null;
 
-      f.result = {
-        range: 0,
-        maxH: f.maxH,
-        time: f.t,
-        hit: res.zone !== null,
-        error: 0,
-        zone: res.zone,
-        points: res.points,
-        missType: res.missType,
-        lateral,
-        player: f.player,
-        impactSpeed: mSpeed,
-        impactEnergy: impactE,
-        penetrationDepth: penDepth,
-        angleOfEntry: angleEntry,
-        stuck: didStick,
-      };
-      if (meta) {
-        fxSeq.current += 1;
-        setFlash({ zone: meta.id, seq: fxSeq.current });
-        pushBurst(hitPos, meta.color, true);
-        playGong(res.zone === "kepala" ? 1 : 0.7);
-        pushPopup(
-          [hitPos[0], hitPos[1] + 0.35, hitPos[2]],
-          res.zone === "kepala"
-            ? `+${res.points} SIRAH! KRITIS!`
-            : `+${res.points} ${meta.label.toUpperCase()}!`,
-          meta.color,
-        );
-      } else {
-        pushPopup(hitPos, "ORA KENA!", "#c9a86a");
+          f.result = {
+            range: 0,
+            maxH: f.maxH,
+            time: f.t,
+            hit: res.zone !== null,
+            error: 0,
+            zone: res.zone,
+            points: res.points,
+            missType: res.missType,
+            lateral,
+            player: f.player,
+            impactSpeed: mSpeed,
+            impactEnergy: impactE,
+            penetrationDepth: penDepth,
+            angleOfEntry: angleEntry,
+            stuck: didStick,
+          };
+          if (meta) {
+            fxSeq.current += 1;
+            setFlash({ zone: meta.id, seq: fxSeq.current });
+            pushBurst(hitPos, meta.color, true);
+            playGong(res.zone === "kepala" ? 1 : 0.7);
+            pushPopup(
+              [hitPos[0], hitPos[1] + 0.35, hitPos[2]],
+              res.zone === "kepala"
+                ? `+${res.points} SIRAH! KRITIS!`
+                : `+${res.points} ${meta.label.toUpperCase()}!`,
+              meta.color,
+            );
+          } else {
+            pushPopup(hitPos, "ORA KENA!", "#c9a86a");
+          }
+          break;
+        }
       }
+      f.checkedIdx = i + 1;
     }
 
     /* ground contact → finalize */
