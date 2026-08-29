@@ -238,6 +238,79 @@ function Editor() {
     previewRef.current = preview;
   }, [preview]);
 
+  // ── Rekam gameplay ke video (MP4) via MediaRecorder ──
+  const [screenRec, setScreenRec] = useState(false);
+  const recRef = useRef<{ rec: MediaRecorder; chunks: Blob[] } | null>(null);
+  const toggleScreenRec = useCallback(() => {
+    if (recRef.current) {
+      recRef.current.rec.stop();
+      return;
+    }
+    const canvas = document.querySelector(
+      ".viewport-stage canvas",
+    ) as HTMLCanvasElement | null;
+    if (!canvas || typeof canvas.captureStream !== "function") {
+      notify({
+        kind: "warn",
+        title: "Rekam tidak didukung",
+        body: "Browser ini tidak mendukung perekaman kanvas.",
+      });
+      return;
+    }
+    const stream = canvas.captureStream(30);
+    const mime = MediaRecorder.isTypeSupported("video/mp4")
+      ? "video/mp4"
+      : MediaRecorder.isTypeSupported("video/webm;codecs=vp9")
+        ? "video/webm;codecs=vp9"
+        : "video/webm";
+    const ext = mime.includes("mp4") ? "mp4" : "webm";
+    let recorder: MediaRecorder;
+    try {
+      recorder = new MediaRecorder(stream, {
+        mimeType: mime,
+        videoBitsPerSecond: 8_000_000,
+      });
+    } catch {
+      notify({ kind: "warn", title: "Rekam gagal", body: "Tidak dapat memulai perekam." });
+      return;
+    }
+    const chunks: Blob[] = [];
+    recorder.ondataavailable = (ev) => {
+      if (ev.data && ev.data.size) chunks.push(ev.data);
+    };
+    recorder.onstop = () => {
+      const blob = new Blob(chunks, { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `jemparingan-${Date.now()}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      recRef.current = null;
+      setScreenRec(false);
+      notify({
+        kind: "success",
+        title: "Rekaman tersimpan",
+        body: `Berkas .${ext} telah diunduh.`,
+      });
+    };
+    recorder.start();
+    recRef.current = { rec: recorder, chunks };
+    setScreenRec(true);
+    notify({
+      kind: "info",
+      title: "Merekam…",
+      body: "Tekan tombol lagi untuk berhenti & menyimpan.",
+    });
+  }, [notify]);
+  useEffect(() => {
+    return () => {
+      if (recRef.current) recRef.current.rec.stop();
+    };
+  }, []);
+
   // Preview TIDAK autoplay. Tombol putar memicu satu lemparan MANUAL;
   // gaya kamera ganti tiap lemparan selesai agar tetap variatif.
   const prevRunning = useRef(false);
@@ -917,6 +990,22 @@ function Editor() {
 
           {/* In-app notifications, anchored inside the viewport */}
           <ToastStack />
+
+          {/* Tombol rekam gameplay (simpan MP4) */}
+          <button
+            type="button"
+            className={`rec-fab ${screenRec ? "is-rec" : ""}`}
+            onClick={toggleScreenRec}
+            title={screenRec ? "Berhenti & Simpan" : "Rekam Gameplay (MP4)"}
+            aria-label="Rekam gameplay"
+          >
+            <span className="rec-dot" />
+          </button>
+          {screenRec && (
+            <div className="rec-badge">
+              <span className="rec-dot" style={{ width: 8, height: 8 }} /> REC
+            </div>
+          )}
 
           {/* Popup hasil di tengah layar setelah lempar — bergaya panel kontrol */}
           {resultModalOpen && result && !preview && (

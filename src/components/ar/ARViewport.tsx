@@ -1404,7 +1404,7 @@ function Scene(props: ViewportProps) {
         <BurstFx key={b.id} burst={b} />
       ))}
       {popups.map((p) => (
-          <Html key={p.id} position={p.pos} center distanceFactor={11} zIndexRange={[40, 0]}>
+          <Html key={p.id} position={p.pos} center distanceFactor={11} zIndexRange={[0, 20000000]}>
             <div className="score-pop">{p.text}</div>
           </Html>
       ))}
