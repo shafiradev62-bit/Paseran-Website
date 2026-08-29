@@ -230,7 +230,7 @@
   align-items: center;
   justify-content: center;
   padding: 16px;
-  background: oklch(0.16 0.02 250 / 0.5);
+  background: oklch(0.14 0.02 250 / 0.92);
   /* Non-blocking: biarkan klik menembus ke panel & scene agar user bisa
      langsung mengatur ulang setelah lempar (tidak "terjebak" di modal). */
   pointer-events: none;
@@ -1445,23 +1445,19 @@ body,
   font-size: 11px;
 }
 
-/* Floating score popup di dunia 3D (+50 SIRAH!, dll.) — gaya emas batik Jawa */
+/* Floating score popup di dunia 3D (+50 SIRAH!, dll.) — teks putih, tanpa area coklat */
 .score-pop {
-  padding: 5px 16px;
+  padding: 4px 14px;
   border-radius: 10px;
-  border: 2px solid #d9a441;
-  background:
-    radial-gradient(circle at 12% 22%, rgba(217, 164, 65, 0.28) 0 1.6px, transparent 2.6px),
-    radial-gradient(circle at 88% 78%, rgba(217, 164, 65, 0.28) 0 1.6px, transparent 2.6px),
-    linear-gradient(180deg, #4a2e14 0%, #38220f 100%);
-  box-shadow:
-    inset 0 0 0 1px rgba(217, 164, 65, 0.45),
-    0 6px 18px oklch(0.15 0.05 60 / 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  background: transparent;
+  box-shadow: 0 2px 10px oklch(0 0 0 / 0.35);
+  color: #ffffff !important;
   font-family: Georgia, "Times New Roman", serif;
   font-weight: 800;
   font-size: 13.5px;
   letter-spacing: 0.05em;
-  text-shadow: 0 1px 2px oklch(0 0 0 / 0.55);
+  text-shadow: 0 1px 3px oklch(0 0 0 / 0.8);
   white-space: nowrap;
   animation: pop-float 1.5s ease forwards;
   will-change: transform, opacity;
@@ -1470,7 +1466,7 @@ body,
 .score-pop::before,
 .score-pop::after {
   content: "❖";
-  color: #d9a441;
+  color: #ffffff;
   margin: 0 7px;
   font-size: 11px;
 }
