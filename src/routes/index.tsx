@@ -271,8 +271,8 @@ function Editor() {
   );
 
   const p = useMemo(
-    () => predict(angle, effectiveVelocity, drag, wind, aeroParams),
-    [angle, effectiveVelocity, drag, wind, aeroParams],
+    () => predict(angle, effectiveVelocity, drag, wind, aeroParams, 0, targetDistance),
+    [angle, effectiveVelocity, drag, wind, aeroParams, targetDistance],
   );
 
   const handleSelect = useCallback((s: Selection | null) => {

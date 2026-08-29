@@ -175,11 +175,15 @@ function integratePath3D(
   wind: number,
   drag: number,
   aero?: AeroParams,
+  lateralOffset: number = 0,
+  targetDistance: number = 20,
 ) {
   const rad = (angle * Math.PI) / 180;
   let vd = velocity * Math.cos(rad);
   let vh = velocity * Math.sin(rad);
-  let vw = 0;
+  // Koreksi lateral: aim dari posisi pelempar ke pusat target (x=0)
+  const approxTimeToTarget = targetDistance / Math.max(vd, 0.1);
+  let vw = approxTimeToTarget > 0 ? -lateralOffset / approxTimeToTarget : 0;
   let d = 0;
   let w = 0;
   let h = LAUNCH_H;
@@ -278,8 +282,8 @@ function integratePath3D(
 }
 
 /** Predicted launch components + summary (drag/wind/aero aware via numeric integration). */
-export function predict(angle: number, velocity: number, drag = 0, wind = 0, aero?: AeroParams) {
-  const p = integratePath3D(angle, velocity, wind, drag, aero);
+export function predict(angle: number, velocity: number, drag = 0, wind = 0, aero?: AeroParams, lateralOffset = 0, targetDistance = 20) {
+  const p = integratePath3D(angle, velocity, wind, drag, aero, lateralOffset, targetDistance);
   const rad = (angle * Math.PI) / 180;
   return {
     vd: velocity * Math.cos(rad),
@@ -695,6 +699,7 @@ function PredictedPath({
   wind,
   drag,
   ox,
+  targetDistance,
   aero,
 }: {
   angle: number;
@@ -702,11 +707,12 @@ function PredictedPath({
   wind: number;
   drag: number;
   ox: number;
+  targetDistance: number;
   aero?: AeroParams;
 }) {
   const path = useMemo(
-    () => integratePath3D(angle, velocity, wind, drag, aero),
-    [angle, velocity, wind, drag, aero],
+    () => integratePath3D(angle, velocity, wind, drag, aero, ox, targetDistance),
+    [angle, velocity, wind, drag, aero, ox, targetDistance],
   );
   const pts = useMemo(
     () =>
@@ -1123,7 +1129,7 @@ function Scene(props: ViewportProps) {
   /* Start of throw — snapshot parameters once per run */
   useEffect(() => {
     if (!running) return;
-    const path = integratePath3D(angle, velocity, wind, drag, aeroParams);
+    const path = integratePath3D(angle, velocity, wind, drag, aeroParams, originX, targetDistance);
     fl.current = {
       active: true,
       t: 0,
@@ -1323,15 +1329,15 @@ function Scene(props: ViewportProps) {
       {/* Environment (hidden in AR so the real world shows through) */}
       {staticEnv}
 
-      {/* Launch position marker */}
-      <group position={[0, 0, LAUNCH_Z]}>
+      {/* Launch position marker — mengikuti posisi pemain */}
+      <group position={[originX, 0, LAUNCH_Z]}>
         <mesh position={[0, 0.015, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <ringGeometry args={[0.4, 0.55, 24]} />
-          <meshBasicMaterial color="#e63946" transparent opacity={0.8} />
+          <meshBasicMaterial color={PLAYER_COLOR[turn] ?? "#e63946"} transparent opacity={0.8} />
         </mesh>
         <Html position={[0, 0.4, 0]} center distanceFactor={14}>
-          <div className="world-tag" style={{ borderColor: "#e63946" }}>
-            Lemparan
+          <div className="world-tag" style={{ borderColor: PLAYER_COLOR[turn] ?? "#e63946" }}>
+            Lemparan{multiplayer ? ` P${turn}` : ""}
           </div>
         </Html>
       </group>
@@ -1364,6 +1370,7 @@ function Scene(props: ViewportProps) {
           wind={wind}
           drag={drag}
           ox={originX}
+          targetDistance={targetDistance}
           aero={aeroParams}
         />
       )}
