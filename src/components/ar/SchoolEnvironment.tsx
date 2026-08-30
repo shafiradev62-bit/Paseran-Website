@@ -791,25 +791,9 @@ export function SchoolEnvironment({
           <Clingeng position={[-3.5, 0, 3]} rotation={0.5} />
           <Clingeng position={[3.5, 0, 3]} rotation={-0.5} />
 
-          {/* ── Elemen budaya Jawa tambahan ── */}
-          {/* Umbul-umbul hias keliling arena */}
-          <UmbulArena />
+          {/* ── Elemen budaya Jawa - di jauhkan agar tidak menghalangi angka ── */}
           {/* Candi bentar (gerbang belah) di ujung lapangan */}
           <CandiBentar z={-46} />
-          {/* Gong ageng & bedug di sisi arena */}
-          <GongAgeng position={[-6.2, 0, -3]} rotation={0.9} scale={1.15} />
-          <GongAgeng position={[6.2, 0, -3]} rotation={-0.9} scale={1.15} />
-          <Bedug position={[-5.8, 0, 4.5]} rotation={0.7} />
-          <Bedug position={[5.8, 0, 4.5]} rotation={-0.7} />
-          {/* Pohon kelapa (satu-satunya vegetasi pohon) */}
-          <PohonKelapa position={[-11, 0, -30]} scale={1.25} />
-          <PohonKelapa position={[11, 0, -33]} rotation={1.1} scale={1.05} />
-          {/* Wayang kulit pengapit kelir */}
-          <WayangKulit position={[-6.7, 0, -28.5]} rotation={0.35} scale={1.35} />
-          <WayangKulit position={[6.7, 0, -28.5]} rotation={-0.35} scale={1.35} color="#4a2418" />
-          {/* Kuda lumping di dekat tikar pelempar */}
-          <KudaLumping position={[-2.4, 0, 2.6]} rotation={0.5} />
-          <KudaLumping position={[2.4, 0, 2.6]} rotation={Math.PI - 0.5} />
 
           {/* Tali bendera segitiga di sisi kiri-kanan arena */}
           <FlagStrings

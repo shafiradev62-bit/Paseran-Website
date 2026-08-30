@@ -31,17 +31,17 @@ const ARViewport = lazy(() =>
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "AR Jemparingan — Simulator Gerak Parabola Kelas X" },
+      { title: "AR Gerak Parabola terintegrasi Paseran" },
       {
         name: "description",
         content:
-          "Simulator 3D gaya game untuk gerak parabola berbasis permainan tradisional Jemparingan: atur sudut, kecepatan awal, dan hambatan udara, lalu amati lintasan di halaman sekolah.",
+          "Simulator 3D Gerak Parabola terintegrasi Paseran: atur sudut, kecepatan awal, dan hambatan udara, lalu amati lintasan di halaman sekolah.",
       },
-      { property: "og:title", content: "AR Jemparingan — Simulator Gerak Parabola" },
+      { property: "og:title", content: "AR Gerak Parabola terintegrasi Paseran" },
       {
         property: "og:description",
         content:
-          "Editor 3D interaktif untuk memvisualisasikan lintasan parabola pada permainan Jemparingan.",
+          "Editor 3D interaktif untuk memvisualisasikan lintasan parabola dengan Paseran.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -1049,7 +1049,7 @@ function Editor() {
                     label="Sudut Elevasi (θ)"
                     value={angle}
                     min={10}
-                    max={80}
+                    max={90}
                     step={1}
                     unit="°"
                     onChange={setAngle}
@@ -1057,7 +1057,7 @@ function Editor() {
                   <Slider
                     label="Kecepatan Awal (v₀)"
                     value={velocity}
-                    min={5}
+                    min={0}
                     max={26}
                     step={0.5}
                     unit="m/s"
@@ -1163,7 +1163,7 @@ function Editor() {
             label="Sudut Elevasi (θ)"
             value={angle}
             min={10}
-            max={80}
+            max={90}
             step={1}
             unit="°"
             onChange={setAngle}
@@ -1171,7 +1171,7 @@ function Editor() {
           <Slider
             label="Kecepatan Awal (v₀)"
             value={velocity}
-            min={5}
+            min={0}
             max={26}
             step={0.5}
             unit="m/s"
