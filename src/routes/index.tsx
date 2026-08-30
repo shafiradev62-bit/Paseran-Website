@@ -40,8 +40,7 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "AR Gerak Parabola terintegrasi Paseran" },
       {
         property: "og:description",
-        content:
-          "Editor 3D interaktif untuk memvisualisasikan lintasan parabola dengan Paseran.",
+        content: "Editor 3D interaktif untuk memvisualisasikan lintasan parabola dengan Paseran.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -246,9 +245,7 @@ function Editor() {
       recRef.current.rec.stop();
       return;
     }
-    const canvas = document.querySelector(
-      ".viewport-stage canvas",
-    ) as HTMLCanvasElement | null;
+    const canvas = document.querySelector(".viewport-stage canvas") as HTMLCanvasElement | null;
     if (!canvas || typeof canvas.captureStream !== "function") {
       notify({
         kind: "warn",
@@ -316,7 +313,9 @@ function Editor() {
   const prevRunning = useRef(false);
   useEffect(() => {
     if (preview && prevRunning.current && !running) {
-      setPreviewStyle((s) => PREVIEW_STYLES[(PREVIEW_STYLES.indexOf(s) + 1) % PREVIEW_STYLES.length] ?? s);
+      setPreviewStyle(
+        (s) => PREVIEW_STYLES[(PREVIEW_STYLES.indexOf(s) + 1) % PREVIEW_STYLES.length] ?? s,
+      );
     }
     prevRunning.current = running;
   }, [preview, running]);
@@ -785,12 +784,10 @@ function Editor() {
           <div className="panel-head">Elemen Budaya Jawa</div>
           <ul className="tree">
             <li className="muted">Candi bentar · gerbang belah</li>
-            <li className="muted">Gong ageng · bedug · bonang</li>
             <li className="muted">Umbul-umbul hias arena</li>
             <li className="muted">Pohon kelapa (vegetasi)</li>
             <li className="muted">Wayang kulit · gunungan</li>
             <li className="muted">Kuda lumping · tikar anyaman</li>
-            <li className="muted">Sesajen · gentong · clingeng</li>
             <li className="muted">Joglo · batik kawung</li>
           </ul>
 
@@ -924,7 +921,8 @@ function Editor() {
             <div className="hud-cell">
               <span>vy (t)</span>
               <strong>
-                {(effectiveVelocity * Math.sin((angle * Math.PI) / 180) - G * live.t).toFixed(2)} m/s
+                {(effectiveVelocity * Math.sin((angle * Math.PI) / 180) - G * live.t).toFixed(2)}{" "}
+                m/s
               </strong>
             </div>
           </div>
@@ -1090,14 +1088,13 @@ function Editor() {
                   </div>
                   <div className="stat">
                     <span>vx (konstan)</span>
-                    <strong>
-                      {(velocity * Math.cos((angle * Math.PI) / 180)).toFixed(2)} m/s
-                    </strong>
+                    <strong>{(velocity * Math.cos((angle * Math.PI) / 180)).toFixed(2)} m/s</strong>
                   </div>
                   <div className="stat">
                     <span>vy (t)</span>
                     <strong>
-                      {(velocity * Math.sin((angle * Math.PI) / 180) - G * result.time).toFixed(2)} m/s
+                      {(velocity * Math.sin((angle * Math.PI) / 180) - G * result.time).toFixed(2)}{" "}
+                      m/s
                     </strong>
                   </div>
                 </div>

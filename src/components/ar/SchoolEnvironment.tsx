@@ -3,14 +3,7 @@ import { useGLTF, Line } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import type { GLTF } from "three-stdlib";
-import {
-  UmbulArena,
-  CandiBentar,
-  GongAgeng,
-  Bedug,
-  WayangKulit,
-  KudaLumping,
-} from "./JawaCulture";
+import { UmbulArena, CandiBentar, GongAgeng, Bedug, WayangKulit, KudaLumping } from "./JawaCulture";
 
 const CHAR_Y_OFFSET = 1.71;
 const LAUNCH_Z = 1.5;
@@ -142,7 +135,11 @@ function SandGround() {
 }
 
 /* ── Standing thrower at the launch pad — remaja.glb ──────────────────────── */
-function ThrowerGLB({ throwingRef }: { throwingRef?: React.MutableRefObject<boolean> | undefined }) {
+function ThrowerGLB({
+  throwingRef,
+}: {
+  throwingRef?: React.MutableRefObject<boolean> | undefined;
+}) {
   const ref = useModel("/remaja.opt.glb");
   const grp = useRef<THREE.Group>(null);
   const lean = useRef(0);
@@ -230,7 +227,8 @@ function PohonKelapa({
   const phase = useRef(Math.random() * Math.PI * 2);
   // Sedikit ayunan daun → scene terasa hidup (seperti ditiup angin).
   useFrame((state) => {
-    if (ref.current) ref.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.6 + phase.current) * 0.018;
+    if (ref.current)
+      ref.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.6 + phase.current) * 0.018;
   });
   return (
     <group ref={ref} position={position} rotation={[0, rotation, 0]} scale={[scale, scale, scale]}>
@@ -696,11 +694,16 @@ useGLTF.preload("/models/joglo.glb");
 function Deferred({ children }: { children: React.ReactNode }) {
   const [show, setShow] = useState(false);
   useEffect(() => {
-    const ric = (window as unknown as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback;
+    const ric = (
+      window as unknown as {
+        requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      }
+    ).requestIdleCallback;
     if (ric) {
       const id = ric(() => setShow(true), { timeout: 500 });
       return () => {
-        const cancel = (window as unknown as { cancelIdleCallback?: (id: number) => void }).cancelIdleCallback;
+        const cancel = (window as unknown as { cancelIdleCallback?: (id: number) => void })
+          .cancelIdleCallback;
         cancel?.(id);
       };
     }
@@ -766,8 +769,6 @@ export function SchoolEnvironment({
           <JogloGLB position={[11, 0, -5]} rotation={-1.1} />
           <JogloGLB position={[-8.5, 0, 11]} rotation={2.4} />
           <JogloGLB position={[9, 0, 12]} rotation={-2.6} />
-          <Gentong position={[3, 0, 0.3]} />
-          <Gentong position={[-3.1, 0, 3]} />
 
           {/* Gunungan wayang pengapit arena */}
           <Gunungan position={[-2.7, 0, 0.8]} rotation={0.35} />
@@ -778,18 +779,9 @@ export function SchoolEnvironment({
           {/* Elemen budaya Jawa: tikar, sesajen, gamelan, kelir, clingeng */}
           {/* Tikar anyaman untuk pelempar duduk bersila */}
           <TikarLemper position={[0, 0, LAUNCH_Z]} rotation={0} />
-          {/* Sesajen di pinggir arena */}
-          <Sesajen position={[-1.8, 0, 1.5]} rotation={0.3} />
-          <Sesajen position={[1.8, 0, 1.5]} rotation={-0.3} />
-          {/* Gamelan bonang di samping arena */}
-          <BonangBarung position={[-5.5, 0, 0]} rotation={0.4} scale={1.2} />
-          <BonangBarung position={[5.5, 0, 0]} rotation={-0.4} scale={1.2} />
           {/* Kelir wayang kulit sebagai latar */}
           <KelirWayang position={[-8, 0, -30]} rotation={0.2} scale={1.5} />
           <KelirWayang position={[8, 0, -30]} rotation={-0.2} scale={1.5} />
-          {/* Clingeng (bamboo wind chimes) */}
-          <Clingeng position={[-3.5, 0, 3]} rotation={0.5} />
-          <Clingeng position={[3.5, 0, 3]} rotation={-0.5} />
 
           {/* ── Elemen budaya Jawa - di jauhkan agar tidak menghalangi angka ── */}
           {/* Candi bentar (gerbang belah) di ujung lapangan */}
