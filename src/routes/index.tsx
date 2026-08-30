@@ -783,10 +783,8 @@ function Editor() {
 
           <div className="panel-head">Elemen Budaya Jawa</div>
           <ul className="tree">
-            <li className="muted">Candi bentar · gerbang belah</li>
             <li className="muted">Umbul-umbul hias arena</li>
             <li className="muted">Pohon kelapa (vegetasi)</li>
-            <li className="muted">Wayang kulit · gunungan</li>
             <li className="muted">Kuda lumping · tikar anyaman</li>
             <li className="muted">Joglo · batik kawung</li>
           </ul>

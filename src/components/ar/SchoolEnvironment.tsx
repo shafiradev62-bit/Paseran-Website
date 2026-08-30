@@ -3,7 +3,6 @@ import { useGLTF, Line } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import type { GLTF } from "three-stdlib";
-import { UmbulArena, CandiBentar, GongAgeng, Bedug, WayangKulit, KudaLumping } from "./JawaCulture";
 
 const CHAR_Y_OFFSET = 1.71;
 const LAUNCH_Z = 1.5;
@@ -521,41 +520,6 @@ function Gentong({ position }: { position: [number, number, number] }) {
   );
 }
 
-/* ── Gunungan wayang (siluet kayu) ─────────────────────────────────────────── */
-function Gunungan({
-  position,
-  rotation = 0,
-  scale = 1.5,
-}: {
-  position: [number, number, number];
-  rotation?: number;
-  scale?: number;
-}) {
-  const geo = useMemo(() => {
-    const s = new THREE.Shape();
-    s.moveTo(0, 0);
-    s.bezierCurveTo(0.55, 0.05, 0.62, 0.45, 0.42, 0.75);
-    s.bezierCurveTo(0.32, 0.95, 0.3, 1.1, 0.12, 1.28);
-    s.bezierCurveTo(0.06, 1.34, 0.02, 1.38, 0, 1.46);
-    s.bezierCurveTo(-0.02, 1.38, -0.06, 1.34, -0.12, 1.28);
-    s.bezierCurveTo(-0.3, 1.1, -0.32, 0.95, -0.42, 0.75);
-    s.bezierCurveTo(-0.62, 0.45, -0.55, 0.05, 0, 0);
-    return new THREE.ExtrudeGeometry(s, { depth: 0.05, bevelEnabled: false });
-  }, []);
-  return (
-    <group position={position} rotation={[0, rotation, 0]} scale={[scale, scale, scale]}>
-      <mesh geometry={geo} castShadow>
-        <meshStandardMaterial color="#3b2412" roughness={0.75} metalness={0.2} />
-      </mesh>
-      {/* tiang penyangga */}
-      <mesh position={[0, -0.18, 0.02]} castShadow>
-        <cylinderGeometry args={[0.035, 0.05, 0.36, 8]} />
-        <meshStandardMaterial color="#5a3a22" roughness={0.9} />
-      </mesh>
-    </group>
-  );
-}
-
 /* ── Tali bendera segitiga sepanjang sisi arena (tiang bambu di kedua ujung) ─ */
 const FLAG_COLORS = ["#e63946", "#f4c430", "#2a6fdb", "#3f7a37", "#e07b39"];
 type StringSpec = { from: [number, number, number]; to: [number, number, number]; count?: number };
@@ -629,57 +593,6 @@ function FlagStrings({ items }: { items: StringSpec[] }) {
 }
 
 /* ── Rumpun bambu di tepi arena ───────────────────────────────────────────── */
-function BambuClump({
-  position,
-  rotation = 0,
-}: {
-  position: [number, number, number];
-  rotation?: number;
-}) {
-  const culms = useMemo(
-    () =>
-      Array.from({ length: 6 }, (_, i) => ({
-        x: Math.sin(i * 2.4) * 0.32,
-        z: Math.cos(i * 1.7) * 0.28,
-        h: 3.2 + ((i * 37) % 13) / 10,
-        tilt: ((i * 53) % 10) / 60,
-        lean: i * 1.05,
-      })),
-    [],
-  );
-  return (
-    <group position={position} rotation={[0, rotation, 0]}>
-      {culms.map((c, i) => (
-        <group key={i} position={[c.x, 0, c.z]} rotation={[c.tilt, c.lean, c.tilt * 0.7]}>
-          <mesh position={[0, c.h / 2, 0]}>
-            <cylinderGeometry args={[0.028, 0.04, c.h, 6]} />
-            <meshStandardMaterial color="#b7bd6e" roughness={0.8} />
-          </mesh>
-          {/* buku bambu */}
-          {[0.35, 0.65, 0.9].map((u) => (
-            <mesh key={u} position={[0, c.h * u, 0]}>
-              <cylinderGeometry args={[0.036, 0.036, 0.03, 6]} />
-              <meshStandardMaterial color="#8f9450" roughness={0.85} />
-            </mesh>
-          ))}
-          {/* daun */}
-          {[0, 1, 2].map((l) => (
-            <mesh
-              key={`leaf${l}`}
-              position={[0.18 + l * 0.06, c.h - 0.2 - l * 0.3, 0.05 * (l - 1)]}
-              rotation={[0.4 * (l - 1), l * 2.1, -0.5]}
-              scale={[1, 1, 0.18]}
-            >
-              <coneGeometry args={[0.09, 0.55, 4]} />
-              <meshStandardMaterial color="#5d8038" roughness={0.95} />
-            </mesh>
-          ))}
-        </group>
-      ))}
-    </group>
-  );
-}
-
 useGLTF.preload("/remaja.opt.glb");
 useGLTF.preload("/models/bapak-duduk.opt.glb");
 useGLTF.preload("/models/bangunan-baru.glb");
@@ -770,22 +683,12 @@ export function SchoolEnvironment({
           <JogloGLB position={[-8.5, 0, 11]} rotation={2.4} />
           <JogloGLB position={[9, 0, 12]} rotation={-2.6} />
 
-          {/* Gunungan wayang pengapit arena */}
-          <Gunungan position={[-2.7, 0, 0.8]} rotation={0.35} />
-          <Gunungan position={[2.7, 0, 0.8]} rotation={-0.35} />
-          <Gunungan position={[-3.2, 0, -9]} rotation={0.2} scale={1.2} />
-          <Gunungan position={[3.2, 0, -9]} rotation={-0.2} scale={1.2} />
-
-          {/* Elemen budaya Jawa: tikar, sesajen, gamelan, kelir, clingeng */}
+          {/* Elemen budaya Jawa: tikar, kelir */}
           {/* Tikar anyaman untuk pelempar duduk bersila */}
           <TikarLemper position={[0, 0, LAUNCH_Z]} rotation={0} />
           {/* Kelir wayang kulit sebagai latar */}
           <KelirWayang position={[-8, 0, -30]} rotation={0.2} scale={1.5} />
           <KelirWayang position={[8, 0, -30]} rotation={-0.2} scale={1.5} />
-
-          {/* ── Elemen budaya Jawa - di jauhkan agar tidak menghalangi angka ── */}
-          {/* Candi bentar (gerbang belah) di ujung lapangan */}
-          <CandiBentar z={-46} />
 
           {/* Tali bendera segitiga di sisi kiri-kanan arena */}
           <FlagStrings
@@ -794,11 +697,6 @@ export function SchoolEnvironment({
               { from: [6.4, 2.55, 2.2], to: [6.4, 2.55, -26.5], count: 22 },
             ]}
           />
-
-          {/* Rumpun bambu di tepi hutan */}
-          <BambuClump position={[-12, 0, -22]} rotation={0.8} />
-          <BambuClump position={[12.5, 0, -27]} rotation={-1.2} />
-          <BambuClump position={[-12.5, 0, -34]} rotation={2.1} />
         </Suspense>
       </Deferred>
     </group>
