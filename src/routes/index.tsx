@@ -480,8 +480,8 @@ function Editor() {
         <div className="brand">
           <span className="brand-mark" aria-hidden />
           <div>
-            <div className="brand-title">AR JEMPARINGAN</div>
-            <div className="brand-sub">Gerak Parabola · Fase E</div>
+            <div className="brand-title">AR GERAK PARABOLA</div>
+            <div className="brand-sub">Terintegrasi Paseran</div>
           </div>
         </div>
 
