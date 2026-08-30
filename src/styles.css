@@ -1493,8 +1493,6 @@ body,
 
 /* Tag zona skor & angin di world */
 .zone-tag,
-.wind-tag,
-.vec-tag,
 .mp-chip {
   border-width: 1.5px;
 }
@@ -1561,12 +1559,6 @@ body,
   border: 2px dashed currentColor;
   font-family: Georgia, "Times New Roman", serif;
   font-weight: 700;
-}
-.wind-tag {
-  border-color: #4da3ff;
-}
-.vec-tag {
-  border-color: #ff5252;
 }
 .mp-chip {
   font-weight: 700;

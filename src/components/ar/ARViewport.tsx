@@ -545,9 +545,6 @@ function WindIndicator({ wind, distance }: { wind: number; distance: number }) {
           <cylinderGeometry args={[0.03, 0.04, 2, 8]} />
           <meshStandardMaterial color="#6b6b6b" metalness={0.5} roughness={0.5} />
         </mesh>
-        <Html position={[0, 2.25, 0]} center distanceFactor={13}>
-          <div className="world-tag wind-tag">Angin Tenang</div>
-        </Html>
       </group>
     );
   }
@@ -581,11 +578,6 @@ function WindIndicator({ wind, distance }: { wind: number; distance: number }) {
           </group>
         ))}
       </group>
-      <Html position={[0, 2.5, 0]} center distanceFactor={13}>
-        <div className="world-tag wind-tag">
-          Angin {dir > 0 ? "→" : "←"} {Math.abs(wind).toFixed(1)} m/s
-        </div>
-      </Html>
     </group>
   );
 }
@@ -742,9 +734,6 @@ function PredictedPath({
             <ringGeometry args={[0.18, 0.26, 22]} />
             <meshBasicMaterial color="#ffd54a" transparent opacity={0.9} />
           </mesh>
-          <Html position={[end.x, 0.35, end.z]} center distanceFactor={14}>
-            <div className="world-tag">Prediksi {path.range.toFixed(1)} m</div>
-          </Html>
         </>
       )}
     </group>
@@ -774,11 +763,6 @@ function VelocityArrow({ angle, velocity, ox }: { angle: number; velocity: numbe
         <coneGeometry args={[0.05, 0.14, 10]} />
         <meshStandardMaterial color="#ff5252" emissive="#ff5252" emissiveIntensity={0.5} />
       </mesh>
-      <Html position={[to.x, to.y + 0.18, to.z]} center distanceFactor={14}>
-        <div className="world-tag vec-tag">
-          v₀ = {velocity.toFixed(1)} m/s · θ = {angle}°
-        </div>
-      </Html>
     </group>
   );
 }
@@ -812,11 +796,6 @@ function RestoringTorqueViz({
   return (
     <group>
       <Line points={pts} color="#ff8a00" lineWidth={2} transparent opacity={0.85} />
-      <Html position={[2.5, 4.2, LAUNCH_Z - targetDistance * 0.5]} center distanceFactor={14}>
-        <div className="world-tag vec-tag" style={{ borderColor: "#ff8a00", color: "#c06600" }}>
-          Restoring Torque (τ)
-        </div>
-      </Html>
     </group>
   );
 }
