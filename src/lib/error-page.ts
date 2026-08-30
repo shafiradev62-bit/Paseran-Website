@@ -3,7 +3,7 @@ export function renderErrorPage(): string {
 <html lang="id">
   <head>
     <meta charset="utf-8" />
-    <title>AR Jemparingan — Scene Error</title>
+    <title>AR Gerak Parabola — Scene Error</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
