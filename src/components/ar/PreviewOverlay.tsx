@@ -2,12 +2,7 @@ import { Pause, Play, SkipForward } from "lucide-react";
 
 export type PreviewStyle = "cinematic" | "orbit" | "follow" | "aerial";
 
-export const PREVIEW_STYLES: readonly PreviewStyle[] = [
-  "cinematic",
-  "orbit",
-  "follow",
-  "aerial",
-];
+export const PREVIEW_STYLES: readonly PreviewStyle[] = ["cinematic", "orbit", "follow", "aerial"];
 
 const STYLE_LABEL: Record<PreviewStyle, string> = {
   cinematic: "TAMPAK DINAMIS",
@@ -109,9 +104,11 @@ export function PreviewOverlay({
       {lastRecord && (
         <div className="preview-record-readout">
           <span className="rec-text">
-            📋 θ {lastRecord.angle}° · v₀ {lastRecord.velocity.toFixed(1)} m/s · x{" "}
-            {lastRecord.range.toFixed(2)} m · H {lastRecord.maxH.toFixed(2)} m ·{" "}
-            {lastRecord.hit ? `+${lastRecord.points} Poin` : "Miss"}
+            θ <span className="rec-num">{lastRecord.angle}°</span> · v₀{" "}
+            <span className="rec-num">{lastRecord.velocity.toFixed(1)}</span> m/s · x{" "}
+            <span className="rec-num">{lastRecord.range.toFixed(2)}</span> m · H{" "}
+            <span className="rec-num">{lastRecord.maxH.toFixed(2)}</span> m ·{" "}
+            {lastRecord.hit ? <span className="rec-num">+{lastRecord.points} Poin</span> : "Miss"}
           </span>
           {onClearRecords && (
             <button
