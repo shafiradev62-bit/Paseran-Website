@@ -59,7 +59,14 @@ export const ZONE_BANDS: {
   { id: "kepala", label: "Atas", yTop: 0.6, yBottom: 0.25, points: 50, color: "#e63946" },
   { id: "leher", label: "Atas-Tengah", yTop: 0.25, yBottom: 0.08, points: 30, color: "#f4a261" },
   { id: "dada", label: "Tengah", yTop: 0.08, yBottom: -0.08, points: 20, color: "#e9c46a" },
-  { id: "kendil", label: "Bawah-Tengah", yTop: -0.08, yBottom: -0.25, points: 10, color: "#2a9d8f" },
+  {
+    id: "kendil",
+    label: "Bawah-Tengah",
+    yTop: -0.08,
+    yBottom: -0.25,
+    points: 10,
+    color: "#2a9d8f",
+  },
   { id: "bawah", label: "Bawah", yTop: -0.25, yBottom: -0.6, points: 5, color: "#264653" },
 ];
 
@@ -142,7 +149,8 @@ function resolveShot(
   height: number,
 ): { zone: ZoneId | null; points: number; missType: MissType } {
   // Spec: saat x_paser >= x_papan, evaluasi y_paser → tentukan pita skor.
-  if (Math.abs(lateral) > TARGET_HALF_W + 0.1) return { zone: null, points: 0, missType: "melebar" };
+  if (Math.abs(lateral) > TARGET_HALF_W + 0.1)
+    return { zone: null, points: 0, missType: "melebar" };
   const dy = height - TARGET_CENTER_Y; // offset vertikal dari pusat papan
   if (dy > TARGET_HALF_H) return { zone: null, points: 0, missType: "tinggi" };
   if (dy < -TARGET_HALF_H) return { zone: null, points: 0, missType: "rendah" };
@@ -282,7 +290,15 @@ function integratePath3D(
 }
 
 /** Predicted launch components + summary (drag/wind/aero aware via numeric integration). */
-export function predict(angle: number, velocity: number, drag = 0, wind = 0, aero?: AeroParams, lateralOffset = 0, targetDistance = 20) {
+export function predict(
+  angle: number,
+  velocity: number,
+  drag = 0,
+  wind = 0,
+  aero?: AeroParams,
+  lateralOffset = 0,
+  targetDistance = 20,
+) {
   const p = integratePath3D(angle, velocity, wind, drag, aero, lateralOffset, targetDistance);
   const rad = (angle * Math.PI) / 180;
   return {
@@ -442,8 +458,9 @@ function TargetJemparingan({
               <meshStandardMaterial
                 color={isLit ? "#fff1bd" : b.color}
                 emissive={b.color}
-                emissiveIntensity={isLit ? 0.5 : 0}
-                roughness={0.85}
+                emissiveIntensity={isLit ? 0.6 : 0.35}
+                roughness={0.7}
+                metalness={0.05}
                 side={THREE.DoubleSide}
               />
             </mesh>
@@ -591,21 +608,23 @@ function DistanceMarkers({ distance }: { distance: number }) {
     return arr;
   }, [distance]);
 
+  const guide = useMemo(() => {
+    const from = new THREE.Vector3(0, 0.02, LAUNCH_Z);
+    const to = new THREE.Vector3(0, 0.02, LAUNCH_Z - distance);
+    const curve = new THREE.LineCurve3(from, to);
+    return new THREE.TubeGeometry(curve, 1, 0.016, 6, false);
+  }, [distance]);
+
   return (
     <group>
-      <Line
-        points={[
-          [0, 0.02, LAUNCH_Z],
-          [0, 0.02, LAUNCH_Z - distance],
-        ]}
-        color="#ffffff"
-        transparent
-        opacity={0.4}
-        dashed
-        dashSize={0.5}
-        gapSize={0.5}
-        lineWidth={1.2}
-      />
+      <mesh geometry={guide} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
+        <meshStandardMaterial
+          color="#ffffff"
+          emissive="#ffffff"
+          emissiveIntensity={0.7}
+          roughness={0.4}
+        />
+      </mesh>
       {marks.map((d) => (
         <group key={d} position={[0, 0, LAUNCH_Z - d]}>
           <mesh rotation={[-Math.PI / 2, 0, 0]} position={[1.35, 0.02, 0]}>
@@ -716,23 +735,34 @@ function PredictedPath({
   );
   const end = pts[pts.length - 1];
 
+  const tube = useMemo(() => {
+    if (pts.length < 2) return null;
+    const curve = new THREE.CatmullRomCurve3(pts, false, "catmullrom", 0.4);
+    return new THREE.TubeGeometry(curve, Math.max(24, pts.length * 2), 0.032, 8, false);
+  }, [pts]);
+
   return (
     <group>
-      <Line
-        points={pts}
-        color="#ffd54a"
-        lineWidth={2}
-        dashed
-        dashSize={0.35}
-        gapSize={0.2}
-        transparent
-        opacity={0.85}
-      />
+      {tube && (
+        <mesh geometry={tube}>
+          <meshStandardMaterial
+            color="#ffd54a"
+            emissive="#ffb000"
+            emissiveIntensity={0.9}
+            roughness={0.35}
+            metalness={0.1}
+          />
+        </mesh>
+      )}
       {end && (
         <>
           <mesh position={[end.x, 0.03, end.z]} rotation={[-Math.PI / 2, 0, 0]}>
-            <ringGeometry args={[0.18, 0.26, 22]} />
-            <meshBasicMaterial color="#ffd54a" transparent opacity={0.9} />
+            <ringGeometry args={[0.18, 0.28, 22]} />
+            <meshBasicMaterial color="#ffd54a" transparent opacity={0.95} />
+          </mesh>
+          <mesh position={[end.x, 0.26, end.z]} rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[0.06, 0.1, 22]} />
+            <meshBasicMaterial color="#ffffff" transparent opacity={0.9} />
           </mesh>
         </>
       )}
@@ -758,10 +788,13 @@ function VelocityArrow({ angle, velocity, ox }: { angle: number; velocity: numbe
 
   return (
     <group>
-      <Line points={[from, to]} color="#ff5252" lineWidth={3} />
+      <mesh position={from} quaternion={quat}>
+        <cylinderGeometry args={[0.018, 0.018, from.distanceTo(to), 8]} />
+        <meshStandardMaterial color="#ff5252" emissive="#ff2222" emissiveIntensity={0.8} />
+      </mesh>
       <mesh position={to} quaternion={quat}>
-        <coneGeometry args={[0.05, 0.14, 10]} />
-        <meshStandardMaterial color="#ff5252" emissive="#ff5252" emissiveIntensity={0.5} />
+        <coneGeometry args={[0.055, 0.16, 12]} />
+        <meshStandardMaterial color="#ff5252" emissive="#ff2222" emissiveIntensity={0.8} />
       </mesh>
     </group>
   );
@@ -791,11 +824,26 @@ function RestoringTorqueViz({
       });
   }, [show, history, targetDistance]);
 
+  const tube = useMemo(() => {
+    if (pts.length < 2) return null;
+    const curve = new THREE.CatmullRomCurve3(pts, false, "catmullrom", 0.6);
+    return new THREE.TubeGeometry(curve, Math.max(16, pts.length), 0.022, 6, false);
+  }, [pts]);
+
   if (pts.length < 2) return null;
 
   return (
     <group>
-      <Line points={pts} color="#ff8a00" lineWidth={2} transparent opacity={0.85} />
+      {tube && (
+        <mesh geometry={tube}>
+          <meshStandardMaterial
+            color="#ff8a00"
+            emissive="#ff8a00"
+            emissiveIntensity={0.8}
+            roughness={0.4}
+          />
+        </mesh>
+      )}
     </group>
   );
 }
@@ -857,16 +905,25 @@ function CameraRig({
       return;
     }
     if (isPreview && previewStyle === "aerial") {
-      tmp.set(Math.sin(t * 0.12) * 6, 20 + Math.sin(t * 0.2) * 1.5, cz + 10 + Math.cos(t * 0.12) * 4);
+      tmp.set(
+        Math.sin(t * 0.12) * 6,
+        20 + Math.sin(t * 0.2) * 1.5,
+        cz + 10 + Math.cos(t * 0.12) * 4,
+      );
       camera.position.lerp(tmp, k);
       camera.lookAt(0, 0.4, cz);
       return;
     }
-    if (isPreview && (previewStyle === "cinematic" || previewStyle === "follow") && followPos.current) {
+    if (
+      isPreview &&
+      (previewStyle === "cinematic" || previewStyle === "follow") &&
+      followPos.current
+    ) {
       const offY = previewStyle === "cinematic" ? 1.15 : 0.7;
       const offZ = previewStyle === "cinematic" ? 3.6 : 3.2;
       // Sedikit guncangan tangan (handheld) pada gaya sinematik → kesan hidup/film.
-      const sx = previewStyle === "cinematic" ? Math.sin(t * 1.7) * 0.05 + Math.sin(t * 0.9) * 0.03 : 0;
+      const sx =
+        previewStyle === "cinematic" ? Math.sin(t * 1.7) * 0.05 + Math.sin(t * 0.9) * 0.03 : 0;
       const sy = previewStyle === "cinematic" ? Math.cos(t * 1.3) * 0.04 : 0;
       tmp.set(
         followPos.current.x + sx,
@@ -1103,7 +1160,13 @@ function Scene(props: ViewportProps) {
   const throwingRef = useRef(running);
   throwingRef.current = running;
   const staticEnv = useMemo(
-    () => (!isARMode ? <><LangitJawa /><SchoolEnvironment throwingRef={throwingRef} /></> : null),
+    () =>
+      !isARMode ? (
+        <>
+          <LangitJawa />
+          <SchoolEnvironment throwingRef={throwingRef} />
+        </>
+      ) : null,
     [isARMode, throwingRef],
   );
 
@@ -1202,12 +1265,14 @@ function Scene(props: ViewportProps) {
           const hitPos: V3 = [lx, hy, planeZ + 0.06];
           const meta = res.zone ? ZONE_BANDS.find((z) => z.id === res.zone)! : null;
           // ── Impact physics calculation ──
-          const mSpeed = f.impactSpeed || Math.hypot(p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]) / STEP;
+          const mSpeed =
+            f.impactSpeed || Math.hypot(p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]) / STEP;
           const impactE = 0.5 * dartMass * mSpeed * mSpeed;
           const hardnessF = HARDNESS_FACTOR[targetHardness] ?? 0.25;
           // Penetration depth: deeper when faster, sharper needle, softer target
           const penDepth = Math.min(0.06, (impactE * needleSharpness * (1 - hardnessF)) / 2.5);
-          const angleEntry = Math.atan2(Math.abs(p1[1] - p0[1]), Math.abs(p1[2] - p0[2])) * (180 / Math.PI);
+          const angleEntry =
+            Math.atan2(Math.abs(p1[1] - p0[1]), Math.abs(p1[2] - p0[2])) * (180 / Math.PI);
           const didStick = penDepth > 0.008 && res.zone !== null;
 
           f.result = {
@@ -1306,11 +1371,11 @@ function Scene(props: ViewportProps) {
   return (
     <>
       {/* Lighting */}
-      {!isARMode && <hemisphereLight args={["#cfe6ff", "#4c7a43", 0.5]} />}
-      <ambientLight intensity={isARMode ? 0.85 : 0.22} />
+      {!isARMode && <hemisphereLight args={["#cfe6ff", "#4c7a43", 0.6]} />}
+      <ambientLight intensity={isARMode ? 0.85 : 0.32} />
       <directionalLight
         position={[12, 18, 8]}
-        intensity={isARMode ? 0.6 : 1.5}
+        intensity={isARMode ? 0.6 : 1.6}
         castShadow={!isARMode}
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}
@@ -1322,6 +1387,24 @@ function Scene(props: ViewportProps) {
         shadow-camera-far={60}
         shadow-bias={-0.0004}
       />
+      {/* Fill light untuk memperjelas detail target & karakter */}
+      {!isARMode && (
+        <directionalLight
+          position={[-10, 6, -4]}
+          intensity={0.8}
+          color="#ffe9c4"
+          castShadow={false}
+        />
+      )}
+      {!isARMode && (
+        <pointLight
+          position={[0, 4.5, LAUNCH_Z - targetDistance]}
+          intensity={6}
+          distance={16}
+          decay={2}
+          color="#fff6d8"
+        />
+      )}
 
       {/* Environment (hidden in AR so the real world shows through) */}
       {staticEnv}
@@ -1383,9 +1466,9 @@ function Scene(props: ViewportProps) {
         <BurstFx key={b.id} burst={b} />
       ))}
       {popups.map((p) => (
-          <Html key={p.id} position={p.pos} center distanceFactor={11} zIndexRange={[0, 20000000]}>
-            <div className="score-pop">{p.text}</div>
-          </Html>
+        <Html key={p.id} position={p.pos} center distanceFactor={11} zIndexRange={[0, 20000000]}>
+          <div className="score-pop">{p.text}</div>
+        </Html>
       ))}
 
       <CameraRig
