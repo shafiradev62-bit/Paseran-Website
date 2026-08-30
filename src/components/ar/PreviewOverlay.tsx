@@ -61,7 +61,7 @@ export function PreviewOverlay({
         <div className="preview-headrow">
           <div className="preview-title">
             <span className="preview-dot" />
-            AR JEMPARINGAN · Simulasi Gerak Parabola
+            AR GERAK PARABOLA · Terintegrasi Paseran
           </div>
           <button className="preview-skip" type="button" onClick={onSkip}>
             Lewati <SkipForward size={15} />
