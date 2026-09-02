@@ -11,6 +11,7 @@ import { MeshoptDecoder, MeshoptEncoder, MeshoptSimplifier } from "meshoptimizer
 import sharp from "sharp";
 
 const JOBS = [
+  { path: "public/bapak duduk.glb", error: 0.0008 },
   { path: "public/remaja.glb", error: 0.0003 },
   { path: "public/models/piagam-baru.glb", error: 0.0003 },
   { path: "public/models/bapak-duduk.glb", error: 0.0008 },

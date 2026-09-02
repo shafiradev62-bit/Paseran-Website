@@ -139,7 +139,7 @@ function ThrowerGLB({
 }: {
   throwingRef?: React.MutableRefObject<boolean> | undefined;
 }) {
-  const ref = useModel("/bapak duduk.glb");
+  const ref = useModel("/bapak duduk.opt.glb");
   const grp = useRef<THREE.Group>(null);
   const lean = useRef(0);
   useFrame((_, dt) => {
@@ -583,7 +583,7 @@ function FlagStrings({ items }: { items: StringSpec[] }) {
 }
 
 /* ── Rumpun bambu di tepi arena ───────────────────────────────────────────── */
-useGLTF.preload("/bapak duduk.glb");
+useGLTF.preload("/bapak duduk.opt.glb");
 useGLTF.preload("/models/bapak-duduk.opt.glb");
 useGLTF.preload("/models/bangunan-baru.glb");
 useGLTF.preload("/models/joglo.glb");
