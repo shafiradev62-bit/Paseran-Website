@@ -139,7 +139,7 @@ function ThrowerGLB({
 }: {
   throwingRef?: React.MutableRefObject<boolean> | undefined;
 }) {
-  const ref = useModel("/remaja.opt.glb");
+  const ref = useModel("/bapak duduk.glb");
   const grp = useRef<THREE.Group>(null);
   const lean = useRef(0);
   useFrame((_, dt) => {
@@ -197,16 +197,6 @@ function BangunanGLB({
       rotation={[0, rotation, 0]}
       scale={[scale, scale, scale]}
     >
-      <primitive object={ref.current as THREE.Object3D} />
-    </group>
-  );
-}
-
-/* ── Piagam plaque near the field ──────────────────────────────────────────── */
-function PiagamGLB({ position }: { position: [number, number, number] }) {
-  const ref = useModel("/models/piagam-baru.opt.glb", false);
-  return (
-    <group position={position}>
       <primitive object={ref.current as THREE.Object3D} />
     </group>
   );
@@ -593,10 +583,9 @@ function FlagStrings({ items }: { items: StringSpec[] }) {
 }
 
 /* ── Rumpun bambu di tepi arena ───────────────────────────────────────────── */
-useGLTF.preload("/remaja.opt.glb");
+useGLTF.preload("/bapak duduk.glb");
 useGLTF.preload("/models/bapak-duduk.opt.glb");
 useGLTF.preload("/models/bangunan-baru.glb");
-useGLTF.preload("/models/piagam-baru.opt.glb");
 useGLTF.preload("/models/joglo.glb");
 
 /**
@@ -664,9 +653,6 @@ export function SchoolEnvironment({
           <BangunanGLB position={[-13, 0, -8]} rotation={0.25} />
           <BangunanGLB position={[13.5, 0, -14]} rotation={-0.3} />
           <BangunanGLB position={[0, 0, -40]} rotation={0.05} />
-
-          {/* Piagam di pinggir lapangan */}
-          <PiagamGLB position={[3.6, 0, -2.5]} />
 
           {/* Pohon-pohon */}
           <PohonKelapa position={[-7, 0, -4]} rotation={0.6} />
