@@ -142,6 +142,9 @@ function ThrowerGLB({
   const ref = useModel("/bapak duduk.opt.glb");
   const grp = useRef<THREE.Group>(null);
   const lean = useRef(0);
+  // Model bapak duduk terpusat (kaki di y≈-0.37 * scale 1.8 ≈ -0.67).
+  // Pangkal ini membuat kaki menapak tikar saat idle (y≈0.02).
+  const BASE_Y = 0.69;
   useFrame((_, dt) => {
     if (!grp.current) return;
     // Ayunan lempar yang hidup: mantul ke depan saat rilis, lalu kembali pelan.
@@ -149,10 +152,10 @@ function ThrowerGLB({
     lean.current += (target - lean.current) * Math.min(1, dt * 7);
     grp.current.rotation.x = -0.45 * lean.current;
     grp.current.position.z = LAUNCH_Z - 0.3 * lean.current;
-    grp.current.position.y = Math.sin(lean.current * Math.PI) * 0.12;
+    grp.current.position.y = BASE_Y + Math.sin(lean.current * Math.PI) * 0.12;
   });
   return (
-    <group ref={grp} position={[0, 0.95, LAUNCH_Z]} rotation={[0, Math.PI, 0]} scale={1.8}>
+    <group ref={grp} position={[0, BASE_Y, LAUNCH_Z]} rotation={[0, Math.PI, 0]} scale={1.8}>
       <primitive object={ref.current as THREE.Object3D} />
     </group>
   );
