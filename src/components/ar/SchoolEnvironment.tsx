@@ -152,7 +152,7 @@ function ThrowerGLB({
     grp.current.position.y = Math.sin(lean.current * Math.PI) * 0.12;
   });
   return (
-    <group ref={grp} position={[0, 0, LAUNCH_Z]} rotation={[0, Math.PI, 0]} scale={1.8}>
+    <group ref={grp} position={[0, 0.95, LAUNCH_Z]} rotation={[0, Math.PI, 0]} scale={1.8}>
       <primitive object={ref.current as THREE.Object3D} />
     </group>
   );
